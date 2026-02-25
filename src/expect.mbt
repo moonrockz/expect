@@ -50,9 +50,7 @@ pub fn Expectation::to_be_false(self : Expectation[Bool]) -> Unit raise Error {
 
 ///|
 /// Assert the actual Option value is Some.
-pub fn[T] Expectation::to_be_some(
-  self : Expectation[T?],
-) -> Unit raise Error {
+pub fn[T] Expectation::to_be_some(self : Expectation[T?]) -> Unit raise Error {
   match self.actual {
     Some(_) => ()
     None => raise Failure::Failure("Expected None to be Some")

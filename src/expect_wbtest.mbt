@@ -6,9 +6,7 @@ test "expect to_equal passes on equal values" {
 ///|
 test "expect to_equal fails on unequal values" {
   let mut caught = false
-  try {
-    expect(3).to_equal(5)
-  } catch {
+  expect(3).to_equal(5) catch {
     e => {
       caught = true
       assert_true(e.to_string().contains("Expected 3 to equal 5"))
@@ -25,9 +23,7 @@ test "expect to_not_equal passes on unequal values" {
 ///|
 test "expect to_not_equal fails on equal values" {
   let mut caught = false
-  try {
-    expect(42).to_not_equal(42)
-  } catch {
+  expect(42).to_not_equal(42) catch {
     e => {
       caught = true
       assert_true(e.to_string().contains("Expected 42 to not equal 42"))
@@ -44,9 +40,7 @@ test "expect to_equal works with strings" {
 ///|
 test "expect to_equal fails with string mismatch" {
   let mut caught = false
-  try {
-    expect("hello").to_equal("world")
-  } catch {
+  expect("hello").to_equal("world") catch {
     e => {
       caught = true
       assert_true(e.to_string().contains("Expected hello to equal world"))
@@ -63,9 +57,7 @@ test "expect to_be_true passes" {
 ///|
 test "expect to_be_true fails on false" {
   let mut caught = false
-  try {
-    expect(false).to_be_true()
-  } catch {
+  expect(false).to_be_true() catch {
     e => {
       caught = true
       assert_true(e.to_string().contains("Expected false to be true"))
@@ -82,9 +74,7 @@ test "expect to_be_false passes" {
 ///|
 test "expect to_be_false fails on true" {
   let mut caught = false
-  try {
-    expect(true).to_be_false()
-  } catch {
+  expect(true).to_be_false() catch {
     e => {
       caught = true
       assert_true(e.to_string().contains("Expected true to be false"))
@@ -143,12 +133,14 @@ test "expect to_contain passes when string contains substring" {
 ///|
 test "expect to_contain fails when string missing substring" {
   let mut caught = false
-  try {
-    expect("hello").to_contain("xyz")
-  } catch {
+  expect("hello").to_contain("xyz") catch {
     e => {
       caught = true
-      assert_true(e.to_string().contains("hello") && e.to_string().contains("to contain") && e.to_string().contains("xyz"))
+      assert_true(
+        e.to_string().contains("hello") &&
+        e.to_string().contains("to contain") &&
+        e.to_string().contains("xyz"),
+      )
     }
   }
   assert_true(caught)
@@ -162,9 +154,7 @@ test "expect to_contain_element passes when array contains element" {
 ///|
 test "expect to_contain_element fails when array missing element" {
   let mut caught = false
-  try {
-    expect([1, 2, 3]).to_contain_element(5)
-  } catch {
+  expect([1, 2, 3]).to_contain_element(5) catch {
     e => {
       caught = true
       assert_true(e.to_string().contains("Expected [1, 2, 3] to contain 5"))
@@ -182,9 +172,7 @@ test "expect to_be_empty passes on empty array" {
 ///|
 test "expect to_be_empty fails on non-empty array" {
   let mut caught = false
-  try {
-    expect([1, 2]).to_be_empty()
-  } catch {
+  expect([1, 2]).to_be_empty() catch {
     e => {
       caught = true
       assert_true(e.to_string().contains("to be empty, but has 2 elements"))
@@ -201,9 +189,7 @@ test "expect to_be_empty_string passes on empty string" {
 ///|
 test "expect to_be_empty_string fails on non-empty string" {
   let mut caught = false
-  try {
-    expect("hello").to_be_empty_string()
-  } catch {
+  expect("hello").to_be_empty_string() catch {
     e => {
       caught = true
       assert_true(e.to_string().contains("to be empty, but has length 5"))
@@ -220,14 +206,10 @@ test "expect to_have_length passes on correct array length" {
 ///|
 test "expect to_have_length fails on wrong array length" {
   let mut caught = false
-  try {
-    expect([1, 2]).to_have_length(5)
-  } catch {
+  expect([1, 2]).to_have_length(5) catch {
     e => {
       caught = true
-      assert_true(
-        e.to_string().contains("to have length 5, but has length 2"),
-      )
+      assert_true(e.to_string().contains("to have length 5, but has length 2"))
     }
   }
   assert_true(caught)
@@ -241,14 +223,10 @@ test "expect to_have_length_string passes on correct string length" {
 ///|
 test "expect to_have_length_string fails on wrong string length" {
   let mut caught = false
-  try {
-    expect("hello").to_have_length_string(3)
-  } catch {
+  expect("hello").to_have_length_string(3) catch {
     e => {
       caught = true
-      assert_true(
-        e.to_string().contains("to have length 3, but has length 5"),
-      )
+      assert_true(e.to_string().contains("to have length 3, but has length 5"))
     }
   }
   assert_true(caught)
