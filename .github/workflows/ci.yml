@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hustcer/setup-moonbit@v1
+
+      - name: Install dependencies
+        run: moon update
+
+      - name: Check formatting
+        run: |
+          moon fmt
+          git diff --exit-code || (echo "::error::moon fmt produced changes — run 'moon fmt' locally and commit" && exit 1)
+
+      - name: Check code
+        run: moon check
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hustcer/setup-moonbit@v1
+
+      - name: Install dependencies
+        run: moon update
+
+      - name: Run unit tests
+        run: moon test
