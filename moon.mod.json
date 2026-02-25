@@ -1,5 +1,15 @@
 {
   "name": "moonrockz/expect",
   "version": "0.1.0",
+  "readme": "README.md",
+  "repository": "https://github.com/moonrockz/expect",
+  "license": "Apache-2.0",
+  "keywords": [
+    "testing",
+    "assertions",
+    "expect",
+    "matchers"
+  ],
+  "description": "A fluent assertion library for MoonBit",
   "source": "src/"
 }
