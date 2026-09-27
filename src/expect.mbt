@@ -12,30 +12,34 @@ pub fn[T] expect(actual : T) -> Expectation[T] {
 
 ///|
 /// Assert the actual value equals the expected value.
-pub fn[T : Eq + Show] Expectation::to_equal(
+pub fn[T : Eq + @debug.Debug] Expectation::to_equal(
   self : Expectation[T],
   expected : T,
 ) -> Unit raise Error {
   if self.actual != expected {
-    raise Failure::Failure("Expected \{self.actual} to equal \{expected}")
+    raise Failure::Failure(
+      "Expected \{Repr(self.actual)} to equal \{Repr(expected)}",
+    )
   }
 }
 
 ///|
 /// Assert the actual value does not equal the given value.
-pub fn[T : Eq + Show] Expectation::to_not_equal(
+pub fn[T : Eq + @debug.Debug] Expectation::to_not_equal(
   self : Expectation[T],
   other : T,
 ) -> Unit raise Error {
   if self.actual == other {
-    raise Failure::Failure("Expected \{self.actual} to not equal \{other}")
+    raise Failure::Failure(
+      "Expected \{Repr(self.actual)} to not equal \{Repr(other)}",
+    )
   }
 }
 
 ///|
 /// Assert the actual boolean value is true.
 pub fn Expectation::to_be_true(self : Expectation[Bool]) -> Unit raise Error {
-  if not(self.actual) {
+  if !self.actual {
     raise Failure::Failure("Expected false to be true")
   }
 }
@@ -59,12 +63,13 @@ pub fn[T] Expectation::to_be_some(self : Expectation[T?]) -> Unit raise Error {
 
 ///|
 /// Assert the actual Option value is None.
-pub fn[T : Show] Expectation::to_be_none(
+pub fn[T : @debug.Debug] Expectation::to_be_none(
   self : Expectation[T?],
 ) -> Unit raise Error {
   match self.actual {
     None => ()
-    Some(_) => raise Failure::Failure("Expected \{self.actual} to be None")
+    Some(_) =>
+      raise Failure::Failure("Expected \{Repr(self.actual)} to be None")
   }
 }
 
@@ -74,9 +79,9 @@ pub fn Expectation::to_contain(
   self : Expectation[String],
   substring : String,
 ) -> Unit raise Error {
-  if not(self.actual.contains(substring)) {
+  if !self.actual.contains(substring) {
     raise Failure::Failure(
-      "Expected \"\{self.actual}\" to contain \"\{substring}\"",
+      "Expected \{Repr(self.actual)} to contain \{Repr(substring)}",
     )
   }
 }
@@ -88,7 +93,7 @@ pub fn Expectation::to_be_empty_string(
 ) -> Unit raise Error {
   if self.actual.length() != 0 {
     raise Failure::Failure(
-      "Expected \"\{self.actual}\" to be empty, but has length \{self.actual.length()}",
+      "Expected \{Repr(self.actual)} to be empty, but has length \{self.actual.length()}",
     )
   }
 }
@@ -102,44 +107,46 @@ pub fn Expectation::to_have_length_string(
   let actual_len = self.actual.length()
   if actual_len != expected {
     raise Failure::Failure(
-      "Expected \"\{self.actual}\" to have length \{expected}, but has length \{actual_len}",
+      "Expected \{Repr(self.actual)} to have length \{expected}, but has length \{actual_len}",
     )
   }
 }
 
 ///|
 /// Assert an Array contains the given element.
-pub fn[T : Eq + Show] Expectation::to_contain_element(
+pub fn[T : Eq + @debug.Debug] Expectation::to_contain_element(
   self : Expectation[Array[T]],
   element : T,
 ) -> Unit raise Error {
-  if not(self.actual.contains(element)) {
-    raise Failure::Failure("Expected \{self.actual} to contain \{element}")
+  if !self.actual.contains(element) {
+    raise Failure::Failure(
+      "Expected \{Repr(self.actual)} to contain \{Repr(element)}",
+    )
   }
 }
 
 ///|
 /// Assert an Array is empty.
-pub fn[T : Show] Expectation::to_be_empty(
+pub fn[T : @debug.Debug] Expectation::to_be_empty(
   self : Expectation[Array[T]],
 ) -> Unit raise Error {
   if self.actual.length() != 0 {
     raise Failure::Failure(
-      "Expected \{self.actual} to be empty, but has \{self.actual.length()} elements",
+      "Expected \{Repr(self.actual)} to be empty, but has \{self.actual.length()} elements",
     )
   }
 }
 
 ///|
 /// Assert an Array has the given length.
-pub fn[T : Show] Expectation::to_have_length(
+pub fn[T : @debug.Debug] Expectation::to_have_length(
   self : Expectation[Array[T]],
   expected : Int,
 ) -> Unit raise Error {
   let actual_len = self.actual.length()
   if actual_len != expected {
     raise Failure::Failure(
-      "Expected \{self.actual} to have length \{expected}, but has length \{actual_len}",
+      "Expected \{Repr(self.actual)} to have length \{expected}, but has length \{actual_len}",
     )
   }
 }
