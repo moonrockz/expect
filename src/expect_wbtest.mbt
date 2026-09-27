@@ -43,7 +43,9 @@ test "expect to_equal fails with string mismatch" {
   expect("hello").to_equal("world") catch {
     e => {
       caught = true
-      assert_true(e.to_string().contains("Expected hello to equal world"))
+      assert_true(
+        e.to_string().contains("Expected \"hello\" to equal \"world\""),
+      )
     }
   }
   assert_true(caught)
@@ -227,6 +229,64 @@ test "expect to_have_length_string fails on wrong string length" {
     e => {
       caught = true
       assert_true(e.to_string().contains("to have length 3, but has length 5"))
+    }
+  }
+  assert_true(caught)
+}
+
+///|
+test "expect to_contain fails with quoted strings in message" {
+  let mut caught = false
+  expect("hello").to_contain("xyz") catch {
+    e => {
+      caught = true
+      assert_true(
+        e.to_string().contains("Expected \"hello\" to contain \"xyz\""),
+      )
+    }
+  }
+  assert_true(caught)
+}
+
+///|
+test "expect to_equal escapes special characters in message" {
+  let mut caught = false
+  expect("a\"b").to_equal("c") catch {
+    e => {
+      caught = true
+      assert_true(e.to_string().contains("Expected \"a\\\"b\" to equal \"c\""))
+    }
+  }
+  assert_true(caught)
+}
+
+///|
+test "expect to_be_none fails with Some value in message" {
+  let mut caught = false
+  expect(Some(42)).to_be_none() catch {
+    e => {
+      caught = true
+      assert_true(e.to_string().contains("Expected Some(42) to be None"))
+    }
+  }
+  assert_true(caught)
+}
+
+///|
+priv struct Point {
+  x : Int
+  y : Int
+} derive(Eq, Debug)
+
+///|
+test "expect to_equal works with custom types deriving Debug" {
+  expect({ x: 1, y: 2, }).to_equal({ x: 1, y: 2, })
+  let mut caught = false
+  expect({ x: 1, y: 2, }).to_equal({ x: 3, y: 4, }) catch {
+    e => {
+      caught = true
+      assert_true(e.to_string().contains("to equal"))
+      assert_true(e.to_string().contains("x: 3"))
     }
   }
   assert_true(caught)
