@@ -9,7 +9,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: hustcer/setup-moonbit@v1
 
@@ -22,12 +22,12 @@ jobs:
           git diff --exit-code || (echo "::error::moon fmt produced changes — run 'moon fmt' locally and commit" && exit 1)
 
       - name: Check code
-        run: moon check
+        run: moon check --deny-warn
 
   unit-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: hustcer/setup-moonbit@v1
 
@@ -35,4 +35,4 @@ jobs:
         run: moon update
 
       - name: Run unit tests
-        run: moon test
+        run: moon test --target all
