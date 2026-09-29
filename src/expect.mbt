@@ -60,6 +60,53 @@ fn[T] Expectation::verify(
 }
 
 ///|
+/// Raise a failure unless `pass` agrees with the negation state. Use this to
+/// write your own matchers with the same failure format as the built-in ones.
+///
+/// - `matcher` is the name in the headline, such as `"to_be_even"`.
+/// - `expected` describes what the matcher wants. Negation adds `not`.
+/// - `received` shows the value under test.
+/// - `args` names the matcher arguments in the headline, such as
+///   `"expected"`.
+/// - `details` adds lines after `Expected` and `Received`, such as
+///   `("Missing", ...)`.
+///
+/// The text is built only when the assertion fails. Put
+/// `#callsite(autofill(loc))` on your matcher and pass its `loc` here, so
+/// that the failure points at the call of your matcher.
+pub fn[T] Expectation::assert_that(
+  self : Expectation[T],
+  pass : Bool,
+  matcher : String,
+  expected~ : () -> String,
+  received~ : () -> String,
+  args? : String = "",
+  details? : () -> Array[(String, String)],
+  loc~ : SourceLoc,
+) -> Unit raise Error {
+  self.verify(
+    pass,
+    matcher,
+    args,
+    () => {
+      let expected_text = expected()
+      let received_text = received()
+      let extra = match details {
+        Some(details) => details()
+        None => []
+      }
+      // For long values a diff is enough on its own.
+      if extra.iter().any(detail => detail.0 == diff_name) &&
+        (expected_text.contains("\n") || received_text.contains("\n")) {
+        return extra
+      }
+      [self.expected_line(expected_text), ("Received", received_text), ..extra]
+    },
+    loc,
+  )
+}
+
+///|
 fn[T, U] Expectation::report(
   self : Expectation[T],
   matcher : String,
@@ -205,27 +252,21 @@ pub fn[T : Eq + @debug.Debug] Expectation::to_equal(
   expected : T,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual == expected,
     "to_equal",
-    "expected",
-    () => {
-      let expected_text = show(expected)
-      let actual_text = show(self.actual)
-      let details = [
-        self.expected_line(expected_text),
-        ("Received", actual_text),
-      ]
-      // For long values the diff is enough on its own.
-      if !self.negated && line_diff(expected_text, actual_text) is Some(diff) {
-        if expected_text.contains("\n") || actual_text.contains("\n") {
-          details.clear()
-        }
-        details.push((diff_name, diff))
+    args="expected",
+    expected=() => show(expected),
+    received=() => show(self.actual),
+    details=() => {
+      if !self.negated &&
+        line_diff(show(expected), show(self.actual)) is Some(diff) {
+        [(diff_name, diff)]
+      } else {
+        []
       }
-      details
     },
-    loc,
+    loc~,
   )
 }
 
@@ -267,12 +308,13 @@ pub fn[T : @debug.Debug] Expectation::to_satisfy(
   description? : String = "predicate",
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     predicate(self.actual),
     "to_satisfy",
-    "predicate",
-    () => [self.expected_line(description), ("Received", show(self.actual))],
-    loc,
+    args="predicate",
+    expected=() => description,
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -283,12 +325,12 @@ pub fn Expectation::to_be_true(
   self : Expectation[Bool],
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual,
     "to_be_true",
-    "",
-    () => [self.expected_line("true"), ("Received", show(self.actual))],
-    loc,
+    expected=() => "true",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -299,12 +341,12 @@ pub fn Expectation::to_be_false(
   self : Expectation[Bool],
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     !self.actual,
     "to_be_false",
-    "",
-    () => [self.expected_line("false"), ("Received", show(self.actual))],
-    loc,
+    expected=() => "false",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -316,14 +358,13 @@ pub fn[T : Compare + @debug.Debug] Expectation::to_be_greater_than(
   other : T,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual > other,
     "to_be_greater_than",
-    "expected",
-    () => {
-      [self.expected_line("> \{show(other)}"), ("Received", show(self.actual))]
-    },
-    loc,
+    args="expected",
+    expected=() => "> \{show(other)}",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -335,14 +376,13 @@ pub fn[T : Compare + @debug.Debug] Expectation::to_be_greater_than_or_equal(
   other : T,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual >= other,
     "to_be_greater_than_or_equal",
-    "expected",
-    () => {
-      [self.expected_line(">= \{show(other)}"), ("Received", show(self.actual))]
-    },
-    loc,
+    args="expected",
+    expected=() => ">= \{show(other)}",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -354,14 +394,13 @@ pub fn[T : Compare + @debug.Debug] Expectation::to_be_less_than(
   other : T,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual < other,
     "to_be_less_than",
-    "expected",
-    () => {
-      [self.expected_line("< \{show(other)}"), ("Received", show(self.actual))]
-    },
-    loc,
+    args="expected",
+    expected=() => "< \{show(other)}",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -373,14 +412,13 @@ pub fn[T : Compare + @debug.Debug] Expectation::to_be_less_than_or_equal(
   other : T,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual <= other,
     "to_be_less_than_or_equal",
-    "expected",
-    () => {
-      [self.expected_line("<= \{show(other)}"), ("Received", show(self.actual))]
-    },
-    loc,
+    args="expected",
+    expected=() => "<= \{show(other)}",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -393,17 +431,13 @@ pub fn[T : Compare + @debug.Debug] Expectation::to_be_between(
   high : T,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     low <= self.actual && self.actual <= high,
     "to_be_between",
-    "low, high",
-    () => {
-      [
-        self.expected_line("between \{show(low)} and \{show(high)} (inclusive)"),
-        ("Received", show(self.actual)),
-      ]
-    },
-    loc,
+    args="low, high",
+    expected=() => "between \{show(low)} and \{show(high)} (inclusive)",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -418,20 +452,16 @@ pub fn Expectation::to_be_close_to(
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let difference = (self.actual - expected).abs()
-  self.verify(
+  self.assert_that(
     difference <= tolerance,
     "to_be_close_to",
-    "expected, tolerance",
-    () => {
-      [
-        self.expected_line(
-          "within \{show_double(tolerance)} of \{show_double(expected)}",
-        ),
-        ("Received", show_double(self.actual)),
-        ("Difference", show_double(difference)),
-      ]
+    args="expected, tolerance",
+    expected=() => {
+      "within \{show_double(tolerance)} of \{show_double(expected)}"
     },
-    loc,
+    received=() => show_double(self.actual),
+    details=() => [("Difference", show_double(difference))],
+    loc~,
   )
 }
 
@@ -442,17 +472,12 @@ pub fn[T] Expectation::to_be_some(
   self : Expectation[T?],
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual is Some(_),
     "to_be_some",
-    "",
-    () => {
-      [
-        self.expected_line("Some(_)"),
-        ("Received", if self.actual is Some(_) { "Some(_)" } else { "None" }),
-      ]
-    },
-    loc,
+    expected=() => "Some(_)",
+    received=() => if self.actual is Some(_) { "Some(_)" } else { "None" },
+    loc~,
   )
 }
 
@@ -463,12 +488,12 @@ pub fn[T : @debug.Debug] Expectation::to_be_none(
   self : Expectation[T?],
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual is None,
     "to_be_none",
-    "",
-    () => [self.expected_line("None"), ("Received", show(self.actual))],
-    loc,
+    expected=() => "None",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -500,12 +525,12 @@ pub fn[T : @debug.Debug, E : @debug.Debug] Expectation::to_be_ok(
   self : Expectation[Result[T, E]],
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual is Ok(_),
     "to_be_ok",
-    "",
-    () => [self.expected_line("Ok(_)"), ("Received", show(self.actual))],
-    loc,
+    expected=() => "Ok(_)",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -516,12 +541,12 @@ pub fn[T : @debug.Debug, E : @debug.Debug] Expectation::to_be_err(
   self : Expectation[Result[T, E]],
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual is Err(_),
     "to_be_err",
-    "",
-    () => [self.expected_line("Err(_)"), ("Received", show(self.actual))],
-    loc,
+    expected=() => "Err(_)",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -590,32 +615,23 @@ pub fn Expectation::to_raise(
     (Some(_), None) => true
     (None, _) => false
   }
-  self.verify(
+  self.assert_that(
     pass,
     "to_raise",
-    if containing is Some(_) {
-      "containing"
-    } else {
-      ""
+    args=if containing is Some(_) { "containing" } else { "" },
+    expected=() => {
+      match containing {
+        Some(text) => "an error containing \{show(text)}"
+        None => "an error"
+      }
     },
-    () => {
-      [
-        self.expected_line(
-          match containing {
-            Some(text) => "an error containing \{show(text)}"
-            None => "an error"
-          },
-        ),
-        (
-          "Received",
-          match raised {
-            Some(error) => "error \{show(describe_error(error))}"
-            None => "no error"
-          },
-        ),
-      ]
+    received=() => {
+      match raised {
+        Some(error) => "error \{show(describe_error(error))}"
+        None => "no error"
+      }
     },
-    loc,
+    loc~,
   )
 }
 
@@ -627,17 +643,13 @@ pub fn Expectation::to_contain(
   substring : String,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual.contains(substring),
     "to_contain",
-    "expected",
-    () => {
-      [
-        self.expected_line("containing \{show(substring)}"),
-        ("Received", show(self.actual)),
-      ]
-    },
-    loc,
+    args="expected",
+    expected=() => "containing \{show(substring)}",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -649,17 +661,13 @@ pub fn Expectation::to_start_with(
   prefix : String,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual.has_prefix(prefix),
     "to_start_with",
-    "expected",
-    () => {
-      [
-        self.expected_line("starting with \{show(prefix)}"),
-        ("Received", show(self.actual)),
-      ]
-    },
-    loc,
+    args="expected",
+    expected=() => "starting with \{show(prefix)}",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -671,17 +679,13 @@ pub fn Expectation::to_end_with(
   suffix : String,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual.has_suffix(suffix),
     "to_end_with",
-    "expected",
-    () => {
-      [
-        self.expected_line("ending with \{show(suffix)}"),
-        ("Received", show(self.actual)),
-      ]
-    },
-    loc,
+    args="expected",
+    expected=() => "ending with \{show(suffix)}",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -711,17 +715,13 @@ pub fn Expectation::to_match(
         loc,
       )
   }
-  self.verify(
+  self.assert_that(
     regex.execute(self.actual) is Some(_),
     "to_match",
-    "pattern",
-    () => {
-      [
-        self.expected_line("matching \{show(pattern)}"),
-        ("Received", show(self.actual)),
-      ]
-    },
-    loc,
+    args="pattern",
+    expected=() => "matching \{show(pattern)}",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -733,17 +733,13 @@ pub fn[T : Eq + @debug.Debug] Expectation::to_contain_element(
   element : T,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual.contains(element),
     "to_contain_element",
-    "expected",
-    () => {
-      [
-        self.expected_line("containing \{show(element)}"),
-        ("Received", show(self.actual)),
-      ]
-    },
-    loc,
+    args="expected",
+    expected=() => "containing \{show(element)}",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -757,21 +753,14 @@ pub fn[T : Eq + @debug.Debug] Expectation::to_contain_all(
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let missing = elements.filter(e => !self.actual.contains(e))
-  self.verify(
+  self.assert_that(
     missing.is_empty(),
     "to_contain_all",
-    "expected",
-    () => {
-      let details = [
-        self.expected_line("containing all of \{show(elements)}"),
-        ("Received", show(self.actual)),
-      ]
-      if !self.negated {
-        details.push(("Missing", show(missing)))
-      }
-      details
-    },
-    loc,
+    args="expected",
+    expected=() => "containing all of \{show(elements)}",
+    received=() => show(self.actual),
+    details=() => if self.negated { [] } else { [("Missing", show(missing))] },
+    loc~,
   )
 }
 
@@ -785,22 +774,20 @@ pub fn[T : Eq + @debug.Debug] Expectation::to_equal_ignoring_order(
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let (missing, extra) = unmatched_elements(self.actual, expected)
-  self.verify(
+  self.assert_that(
     missing.is_empty() && extra.is_empty(),
     "to_equal_ignoring_order",
-    "expected",
-    () => {
-      let details = [
-        self.expected_line("\{show(expected)} in any order"),
-        ("Received", show(self.actual)),
-      ]
-      if !self.negated {
-        details.push(("Missing", show(missing)))
-        details.push(("Extra", show(extra)))
+    args="expected",
+    expected=() => "\{show(expected)} in any order",
+    received=() => show(self.actual),
+    details=() => {
+      if self.negated {
+        []
+      } else {
+        [("Missing", show(missing)), ("Extra", show(extra))]
       }
-      details
     },
-    loc,
+    loc~,
   )
 }
 
@@ -847,23 +834,20 @@ pub fn[T : @debug.Debug] Expectation::to_all_satisfy(
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let failed_index = self.actual.search_by(e => !predicate(e))
-  self.verify(
+  self.assert_that(
     failed_index is None,
     "to_all_satisfy",
-    "predicate",
-    () => {
-      let details = [
-        self.expected_line("every element to satisfy \{description}"),
-        ("Received", show(self.actual)),
-      ]
-      if failed_index is Some(index) {
-        details.push(
-          ("Failed at", "index \{index}: \{show(self.actual[index])}"),
-        )
+    args="predicate",
+    expected=() => "every element to satisfy \{description}",
+    received=() => show(self.actual),
+    details=() => {
+      match failed_index {
+        Some(index) =>
+          [("Failed at", "index \{index}: \{show(self.actual[index])}")]
+        None => []
       }
-      details
     },
-    loc,
+    loc~,
   )
 }
 
@@ -875,17 +859,13 @@ pub fn[K : Hash + Eq + @debug.Debug, V : @debug.Debug] Expectation::to_contain_k
   key : K,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  self.verify(
+  self.assert_that(
     self.actual.contains(key),
     "to_contain_key",
-    "key",
-    () => {
-      [
-        self.expected_line("containing key \{show(key)}"),
-        ("Received", show(self.actual)),
-      ]
-    },
-    loc,
+    args="key",
+    expected=() => "containing key \{show(key)}",
+    received=() => show(self.actual),
+    loc~,
   )
 }
 
@@ -935,18 +915,13 @@ pub fn[C : HasLength + @debug.Debug] Expectation::to_be_empty(
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let actual_len = HasLength::length(self.actual)
-  self.verify(
+  self.assert_that(
     actual_len == 0,
     "to_be_empty",
-    "",
-    () => {
-      [
-        self.expected_line("empty"),
-        ("Received", show(self.actual)),
-        ("Length", actual_len.to_string()),
-      ]
-    },
-    loc,
+    expected=() => "empty",
+    received=() => show(self.actual),
+    details=() => [("Length", actual_len.to_string())],
+    loc~,
   )
 }
 
@@ -959,18 +934,14 @@ pub fn[C : HasLength + @debug.Debug] Expectation::to_have_length(
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let actual_len = HasLength::length(self.actual)
-  self.verify(
+  self.assert_that(
     actual_len == expected,
     "to_have_length",
-    "expected",
-    () => {
-      [
-        self.expected_line("length \{expected}"),
-        ("Received", show(self.actual)),
-        ("Length", actual_len.to_string()),
-      ]
-    },
-    loc,
+    args="expected",
+    expected=() => "length \{expected}",
+    received=() => show(self.actual),
+    details=() => [("Length", actual_len.to_string())],
+    loc~,
   )
 }
 
