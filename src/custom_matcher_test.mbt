@@ -144,3 +144,15 @@ test "matcher values from another package" {
     ),
   )
 }
+
+///|
+test "custom matchers collect failures in a scope" {
+  let message = failure_message(() => {
+    @expect.expect_all(s => {
+      s.expect(3).to_be_even()
+      s.expect(5).to_be_even()
+      s.expect(4).to_be_even()
+    })
+  })
+  inspect(message.has_prefix("2 of 3 assertions failed"), content="true")
+}
