@@ -89,7 +89,12 @@ fn[T] Expectation::verify(
     scope.state.assertions += 1
   }
   if pass == self.negated {
-    let message = self.failure_message(matcher, args, details())
+    let message = self.failure_message(
+      matcher,
+      args,
+      details(),
+      color_enabled(),
+    )
     match self.scope {
       // In a soft-assertion scope, record the failure and go on.
       Some(scope) => scope.record(loc.to_string(), message)
@@ -152,6 +157,7 @@ fn[T] Expectation::failure_message(
   matcher : String,
   args : String,
   details : Array[(String, String)],
+  color : Bool,
 ) -> String {
   let label = if self.label.is_empty() { "" } else { "\{self.label}: " }
   let not_ = if self.negated { ".not" } else { "" }
@@ -161,7 +167,7 @@ fn[T] Expectation::failure_message(
   } else {
     [..details, ("Because", self.reason)]
   }
-  "\{headline}\n\{render_details(details)}"
+  "\{paint(headline, Bold, color)}\n\{render_details(details, color~)}"
 }
 
 ///|
@@ -174,7 +180,7 @@ fn[T, U] Expectation::report(
   details : Array[(String, String)],
   loc : SourceLoc,
 ) -> U raise Error {
-  let message = self.failure_message(matcher, args, details)
+  let message = self.failure_message(matcher, args, details, color_enabled())
   match self.scope {
     Some(scope) => {
       scope.state.assertions += 1
@@ -252,7 +258,10 @@ let kept_tail_lines = 5
 let diff_name = "Diff (- expected, + received)"
 
 ///|
-fn render_details(details : Array[(String, String)]) -> String {
+fn render_details(
+  details : Array[(String, String)],
+  color? : Bool = false,
+) -> String {
   let width = details.fold(init=0, (width, detail) => {
     let length = detail.0.length()
     // Names of values that start on their own line do not set the width.
@@ -275,8 +284,16 @@ fn render_details(details : Array[(String, String)]) -> String {
     // under the `Received` value.
     if name.is_empty() {
       builder.write_string(" ".repeat(width + 2))
-      builder.write_string(value)
+      builder.write_string(paint(value, Yellow, color))
       continue
+    }
+    let paint_line = (line : String) => {
+      match name {
+        "Expected" => paint(line, Red, color)
+        "Received" => paint(line, Green, color)
+        _ if name == diff_name => paint_diff_line(line, color)
+        _ => line
+      }
     }
     let lines = value.split("\n").map(line => line.to_owned()).collect()
     // Diff hunks already leave out unchanged lines.
@@ -284,11 +301,11 @@ fn render_details(details : Array[(String, String)]) -> String {
     if lines.length() == 1 && name != diff_name {
       builder.write_string("\{name}:")
       builder.write_string(" ".repeat(width - name.length() + 1))
-      builder.write_string(lines[0])
+      builder.write_string(paint_line(lines[0]))
     } else {
       builder.write_string("\{name}:")
       for line in lines {
-        builder.write_string("\n  \{line}")
+        builder.write_string("\n  \{paint_line(line)}")
       }
     }
   }
@@ -314,6 +331,7 @@ fn shorten(lines : Array[String]) -> Array[String] {
 fn describe_error(error : Error) -> String {
   match error {
     Failure(message) => {
+      let message = strip_ansi(message)
       let marker = " FAILED: "
       match message.find(marker) {
         Some(index) =>
@@ -321,7 +339,7 @@ fn describe_error(error : Error) -> String {
         None => message
       }
     }
-    _ => error.to_string()
+    _ => strip_ansi(error.to_string())
   }
 }
 
@@ -668,7 +686,7 @@ pub fn[T] Expectation::to_raise(
 ) -> Unit raise Error {
   let raised = self.call()
   let pass = match (raised, containing) {
-    (Some(error), Some(text)) => error.to_string().contains(text)
+    (Some(error), Some(text)) => strip_ansi(error.to_string()).contains(text)
     (Some(_), None) => true
     (None, _) => false
   }
