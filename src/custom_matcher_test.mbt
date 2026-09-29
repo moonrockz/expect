@@ -114,3 +114,33 @@ test "custom matcher failure points at the matcher call" {
   let (call, failed) = failure_line(() => @expect.expect(3).to_be_even())
   inspect(call == failed, content="true")
 }
+
+///|
+/// A reusable matcher, as a shared package would export it.
+fn even() -> @expect.Matcher[Int] {
+  {
+    describe: () => "even",
+    check: x => if x % 2 == 0 { None } else { Some("was odd") },
+  }
+}
+
+///|
+test "matcher values from another package" {
+  @expect.expect(4).to(even())
+  @expect.expect([1, 3, 4]).to_contain_element_matching(even())
+  @expect.expect(3).to(@expect.is_not(even()))
+  @expect.expect(6).to(@expect.all_of([even(), @expect.equal_to(6)]))
+  inspect(
+    failure_message(() => {
+      @expect.expect(3).to(@expect.any_of([even(), @expect.equal_to(4)]))
+    }),
+    content=(
+      #|expect(received).to(matcher)
+      #|Expected: any of (even, equal to 4)
+      #|Received: 3
+      #|Mismatch:
+      #|  even: was odd
+      #|  equal to 4: was 3
+    ),
+  )
+}

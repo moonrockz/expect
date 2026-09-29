@@ -101,6 +101,31 @@ def matchers():
     return found
 
 
+FREE = re.compile(r"pub fn(\[[^\]]*\])? (\w+)\(")
+
+
+def matcher_functions():
+    """Public free functions that return a `Matcher`."""
+    found = []
+    for path in sorted(SRC.glob("*.mbt")):
+        if path.name.endswith("_test.mbt") or path.name.endswith("_wbtest.mbt"):
+            continue
+        text = path.read_text()
+        for m in FREE.finditer(text):
+            close = balanced(text, m.end() - 1)
+            returns = text[close + 1 : text.index("{", close)]
+            if "Matcher[" not in returns:
+                continue
+            above = text[: m.start()].rstrip("\n").split("\n")
+            doc = []
+            while above and (above[-1].startswith("///") or above[-1].startswith("#")):
+                line = above.pop()
+                if line.startswith("///"):
+                    doc.insert(0, line)
+            found.append({"name": m.group(2), "summary": doc_summary("\n".join(doc))})
+    return found
+
+
 def failure_regions(text):
     """Character ranges of `failure(...)` calls, whose assertions fail."""
     regions = []
@@ -137,6 +162,11 @@ def score(code, name, public):
         result += 1
     if any(m not in public for m in methods):
         result += 8
+    if re.search(r"\.\w+\([a-z_]\w*\)", code):
+        result += 3
+    calls = re.findall(r"(?<![.\w@])([a-z_]\w*)\(", code)
+    if any(c not in public for c in calls):
+        result += 8
     return result
 
 
@@ -157,18 +187,29 @@ def examples(public):
             if not match or stripped.count("(") != stripped.count(")"):
                 continue
             code = match.group(1)
-            for name in set(re.findall(r"\.(\w+)\(", code)):
+            for name in set(re.findall(r"(?<![\w@])\.?(\w+)\(", code)):
                 candidates.setdefault(name, []).append(code)
     result = {}
     for name, codes in candidates.items():
-        best = min(codes, key=lambda code: score(code, name, public))
-        result[name] = "@expect." + best
+        best = min(codes, key=lambda code: (score(code, name, public), len(code)))
+        # Users call the free functions of the package with `@expect.`.
+        qualified = re.sub(
+            r"(?<![.\w@])(\w+)\(",
+            lambda m: ("@expect." if m.group(1) in public else "") + m.group(0),
+            best,
+        )
+        result[name] = qualified
     return result
 
 
 def render():
     found = matchers()
-    public = {m["name"] for m in found} | {"not", "because", "assert_that"}
+    functions = matcher_functions()
+    public = (
+        {m["name"] for m in found}
+        | {f["name"] for f in functions}
+        | {"not", "because", "assert_that", "expect", "expect_call"}
+    )
     samples = examples(public)
     out = [
         "# Matchers",
@@ -201,6 +242,24 @@ def render():
             example_text = f"`{example}`" if example else ""
             summary = m["summary"].replace("|", "\\|")
             out.append(f"| {name} | {summary} | {example_text.replace('|', chr(92) + '|')} |")
+        out.append("")
+    if functions:
+        out += [
+            "## Matcher values",
+            "",
+            "Functions that return a `Matcher[T]`. Run one with `to`, or pass it to",
+            "another matcher such as `to_contain_element_matching`.",
+            "",
+            "| Function | Description | Example |",
+            "|---|---|---|",
+        ]
+        for f in functions:
+            example = samples.get(f["name"])
+            if example is None:
+                missing.append(f["name"])
+            example_text = f"`{example}`" if example else ""
+            summary = f["summary"].replace("|", "\\|")
+            out.append(f"| `{f['name']}` | {summary} | {example_text.replace('|', chr(92) + '|')} |")
         out.append("")
     grouped = {m["name"] for title, test in GROUPS for m in found if test(m["subject"], m["bounds"])}
     ungrouped = [m["name"] for m in found if m["name"] not in grouped]
