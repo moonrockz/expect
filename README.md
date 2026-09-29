@@ -230,6 +230,32 @@ pub fn even() -> @expect.Matcher[Int] {
 Unlike custom matcher methods, these functions can be public, so a package
 can share them.
 
+### Equivalence
+
+`to_be_equivalent_to` compares two values field by field, and lists each
+difference by path. The type does not need `Eq`:
+
+```moonbit
+@expect.expect(saved).to_be_equivalent_to(
+  draft,
+  excluding=["id", "items[*].id"], // skip these paths; [*] matches any index
+  ignoring_order=true, // compare arrays as multisets, at every depth
+  tolerance=0.01, // numbers may differ by up to 0.01
+)
+```
+
+```text
+expect(received).to_be_equivalent_to(expected)
+Expected: equivalent to { id: 1, owner: "Ada", balance: { cents: 1050 } }
+Received: { id: 1, owner: "Ada", balance: { cents: 1005 } }
+Differences:
+  balance.cents: expected 1050, received 1005
+```
+
+Equivalence compares what `Debug` shows. Fields that `Debug` hides, for
+example with `Repr::omitted()`, always compare as equivalent. Values that
+`Debug` shows as text, such as a custom `Repr::literal`, compare as text.
+
 ### Many matchers on one value
 
 Matchers return `Unit`, so they do not chain. Use `all` to run several

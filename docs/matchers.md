@@ -15,6 +15,7 @@ is not a number.
 
 | Method | Description | Example |
 |---|---|---|
+| `to_be_equivalent_to` | Assert the actual value is equivalent to `expected`: the two values are compared field by field, through what their `Debug` output shows. The type does not need `Eq`. | `@expect.expect((1.0, [2.0])).to_be_equivalent_to((1.05, [1.95]), tolerance=0.1)` |
 | `because` → `Expectation[T]` | Give the reason why the assertion must hold. A failure shows the reason on a `Because` line: `expect(retries).because("the client retries three times").to_equal(3)`. | `@expect.expect(1).because("never fails").to_equal(1)` |
 | `not` → `Expectation[T]` | Negate the next matcher. | `@expect.expect(3).not().to_equal(5)` |
 | `to_equal` | Assert the actual value equals the expected value. | `@expect.expect(42).to_equal(42)` |
