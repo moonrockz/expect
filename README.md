@@ -134,15 +134,32 @@ matchers on the same value:
 
 ### Errors
 
-Use `expect_call` with an arrow function to assert that code raises:
+Use `expect_call` with an arrow function to assert that code raises, or that
+it returns:
 
 ```moonbit
-@expect.expect_call(() => parse("x") |> ignore).to_raise()
-@expect.expect_call(() => parse("x") |> ignore).to_raise(containing="invalid")
-@expect.expect_call(() => parse("1") |> ignore).not().to_raise()
+@expect.expect_call(() => parse("x")).to_raise()
+@expect.expect_call(() => parse("x")).to_raise(containing="invalid")
+@expect.expect_call(() => parse("1")).not().to_raise()
+
+// Check the type of the error with an `is` pattern
+@expect.expect_call(() => parse("x")).to_raise_matching(
+  e => e is ParseError::Invalid(_),
+  description="an Invalid error",
+)
+
+// Chain on the error or on the returned value
+@expect.expect_call(() => parse("x")).to_raise_error().message().to_contain("invalid")
+@expect.expect_call(() => parse("1")).to_return().to_equal(1)
 ```
 
-`containing` checks the error's `to_string()` output.
+`containing` checks the error's `to_string()` output. `message()` gives the
+error's `to_string()` output too, but for a `Failure` raised by `fail` it
+leaves out the source location.
+
+The function can return any type. When its return type is fully generic,
+for example `() => fail("boom")`, MoonBit cannot infer the type and warns.
+Give the function a type, or call a function that returns `Unit`.
 
 ### Regular expressions
 
