@@ -142,6 +142,59 @@ impl @expect.HasLength for Bag with length(self) {
 `to_be_empty_string` and `to_have_length_string` are deprecated. Use
 `to_be_empty` and `to_have_length` instead.
 
+### Custom matchers
+
+Write your own matcher as a method on `@expect.Expectation` in your test
+package, and call `assert_that` to check the condition. `assert_that` gives
+your matcher the same failure format as the built-in matchers: negation,
+labels and the location of the failed call all work.
+
+```moonbit
+#callsite(autofill(loc))
+fn @expect.Expectation::to_be_even(
+  self : @expect.Expectation[Int],
+  loc~ : SourceLoc,
+) -> Unit raise Error {
+  self.assert_that(
+    self.actual % 2 == 0,
+    "to_be_even",
+    expected=() => "an even number",
+    received=() => @debug.to_string(self.actual),
+    loc~,
+  )
+}
+
+test "custom matcher" {
+  @expect.expect(4).to_be_even()
+  @expect.expect(3).not().to_be_even()
+}
+```
+
+A failure shows:
+
+```text
+expect(received).to_be_even()
+Expected: an even number
+Received: 3
+```
+
+- `expected` describes what the matcher wants. After `not()`, the message
+  adds `not` in front of it.
+- `received` shows the value under test.
+- `args` names the arguments in the headline, for example `args="total"`
+  gives `to_have_total(total)`.
+- `details` adds lines after `Received`, for example
+  `details=() => [("Total", total.to_string())]`.
+
+The text is built only when the assertion fails, so a passing matcher does not
+pay to format values. Put `#callsite(autofill(loc))` on your matcher and pass
+`loc~` to `assert_that`, so that the failure points at the line that calls
+your matcher.
+
+MoonBit lets a package add methods to a type from another package only when
+the methods are private. So a custom matcher method is available only in the
+package that defines it.
+
 ## Failure messages
 
 All assertions raise `Failure`. The message starts with the location of the
