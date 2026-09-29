@@ -16,10 +16,11 @@ is not a number.
 | Method | Description | Example |
 |---|---|---|
 | `because` → `Expectation[T]` | Give the reason why the assertion must hold. A failure shows the reason on a `Because` line: `expect(retries).because("the client retries three times").to_equal(3)`. | `@expect.expect(1).because("never fails").to_equal(1)` |
-| `not` → `Expectation[T]` | Negate the next matcher. | `@expect.expect([1, 2, 3]).not().to_contain_exactly([3, 2, 1])` |
+| `not` → `Expectation[T]` | Negate the next matcher. | `@expect.expect(3).not().to_equal(5)` |
 | `to_equal` | Assert the actual value equals the expected value. | `@expect.expect(42).to_equal(42)` |
 | `to_not_equal` | Assert the actual value does not equal the given value. | `@expect.expect(3).to_not_equal(5)` |
 | `to_satisfy` | Assert the actual value satisfies a predicate. | `@expect.expect(4).to_satisfy(x => x % 2 == 0)` |
+| `to` | Assert the actual value matches `matcher`. | `@expect.expect(3).to(@expect.equal_to(3))` |
 | `get` → `Expectation[U]` | Apply `f` to the value under test and return an expectation on the result. `name` extends the label, so failures show the path to the value. Cannot be used after `not()`. | `@expect.expect([ada]).single().get("name", u => u.name).to_equal("Ada")` |
 | `all` | Run several matchers on the same value: `expect(age).all(it => { it.to_be_greater_than(0); it.to_be_less_than(150) })`. | `@expect.expect(3).all(it => it.to_be_positive())` |
 | `to_be_one_of` | Assert the actual value equals one of `values`. | `@expect.expect(2).to_be_one_of([1, 2, 3])` |
@@ -82,13 +83,13 @@ is not a number.
 | `to_contain` | Assert a String contains the given substring. | `@expect.expect("hello world").to_contain("world")` |
 | `to_start_with` | Assert a String starts with the given prefix. | `@expect.expect("hello world").to_start_with("hello")` |
 | `to_end_with` | Assert a String ends with the given suffix. | `@expect.expect("hello world").to_end_with("world")` |
-| `to_match` | Assert a String matches a regular expression. The match is a search: it can start anywhere in the string. Use `^` and `$` to match the whole string. | `@expect.expect("order 42").to_match("[[:digit:]]+")` |
+| `to_match` | Assert a String matches a regular expression. The match is a search: it can start anywhere in the string. Use `^` and `$` to match the whole string. | `@expect.expect("abc").to_match("^a.c$")` |
 | `to_equal_ignoring_case` | Assert a String equals `expected` when case is ignored. | `@expect.expect("Hello").to_equal_ignoring_case("hELLO")` |
 | `to_equal_ignoring_whitespace` | Assert a String equals `expected` when all whitespace is removed from both. Whitespace is every character for which `Char::is_whitespace` is true, such as spaces, tabs and newlines. | `@expect.expect(" a b\n\tc ").to_equal_ignoring_whitespace("abc")` |
 | `to_be_blank` | Assert a String is empty or holds only whitespace. | `@expect.expect("").to_be_blank()` |
-| `to_contain_times` | Assert a String contains `text` exactly `count` times. Occurrences do not overlap: `"aaaa"` contains `"aa"` twice. | `@expect.expect("a-b-c").to_contain_times("-", 2)` |
+| `to_contain_times` | Assert a String contains `text` exactly `count` times. Occurrences do not overlap: `"aaaa"` contains `"aa"` twice. | `@expect.expect("abc").to_contain_times("x", 0)` |
 | `to_contain_substrings_in_order` | Assert a String contains the given parts in this order, with other text allowed between them. | `@expect.expect("one two three").to_contain_substrings_in_order(["one", "three"])` |
-| `to_match_fully` | Assert the whole String matches a regular expression. Unlike `to_match`, the match must start at the start of the string and end at its end. | `@expect.expect("2024-01-02").to_match_fully("[[:digit:]]+-[[:digit:]]+-[[:digit:]]+")` |
+| `to_match_fully` | Assert the whole String matches a regular expression. Unlike `to_match`, the match must start at the start of the string and end at its end. | `@expect.expect("ab").to_match_fully("a\|ab")` |
 
 ## Chars
 
@@ -104,8 +105,8 @@ is not a number.
 
 | Method | Description | Example |
 |---|---|---|
-| `to_be_empty` | Assert the actual value is empty. | `@expect.expect(([] : Array[Int])).to_be_empty()` |
-| `to_have_length` | Assert the actual value has the given length. | `@expect.expect([1, 2, 3]).to_have_length(3)` |
+| `to_be_empty` | Assert the actual value is empty. | `@expect.expect("").to_be_empty()` |
+| `to_have_length` | Assert the actual value has the given length. | `@expect.expect(b"abc").to_have_length(3)` |
 
 ## Arrays
 
@@ -128,6 +129,7 @@ is not a number.
 | `to_contain_all` | Assert an Array contains every one of the given elements. Negated, it asserts that at least one element is missing. | `@expect.expect([1, 2, 3]).to_contain_all([3, 1])` |
 | `to_equal_ignoring_order` | Assert an Array has the same elements as `expected`, in any order. Duplicates count: `[1, 1, 2]` does not match `[1, 2, 2]`. | `@expect.expect([3, 1, 2]).to_equal_ignoring_order([1, 2, 3])` |
 | `to_all_satisfy` | Assert every element of an Array satisfies a predicate. Negated, it asserts that at least one element does not. | `@expect.expect([2, 4, 6]).to_all_satisfy(x => x % 2 == 0)` |
+| `to_contain_element_matching` | Assert at least one element of an Array matches `matcher`. A failure shows why each element does not match. | `@expect.expect([1, 2, 3]).to_contain_element_matching(@expect.equal_to(2))` |
 | `element` → `Expectation[T]` | Assert an Array has an element at `index`, and return an expectation on it. Cannot be used after `not()`. | `@expect.expect([10, 20, 30]).element(1).to_equal(20)` |
 | `first` → `Expectation[T]` | Assert an Array is not empty, and return an expectation on its first element. Cannot be used after `not()`. | `@expect.expect([1, 2, 3]).first().to_equal(1)` |
 | `last` → `Expectation[T]` | Assert an Array is not empty, and return an expectation on its last element. Cannot be used after `not()`. | `@expect.expect([1, 2, 3]).last().to_equal(3)` |
@@ -171,3 +173,18 @@ is not a number.
 | Method | Description | Example |
 |---|---|---|
 | `message` → `Expectation[String]` | Return an expectation on the message of an error. For a `Failure` raised by `fail`, the message does not include the source location. | `@expect.expect_call(() => fails("x")).to_raise_error().message().to_equal("x")` |
+
+## Matcher values
+
+Functions that return a `Matcher[T]`. Run one with `to`, or pass it to
+another matcher such as `to_contain_element_matching`.
+
+| Function | Description | Example |
+|---|---|---|
+| `equal_to` | A matcher for values equal to `expected`. | `@expect.expect(3).to(@expect.equal_to(3))` |
+| `satisfying` | A matcher for values that satisfy `predicate`. | `@expect.expect(4).to(@expect.satisfying(x => x % 2 == 0, description="even"))` |
+| `all_of` | A matcher for values that match every one of `matchers`. A mismatch names each part that does not match. | `@expect.expect(4).to(@expect.all_of([@expect.equal_to(4), @expect.is_not(@expect.equal_to(5))]))` |
+| `any_of` | A matcher for values that match at least one of `matchers`. | `@expect.expect(8).to(@expect.any_of([@expect.equal_to(1), @expect.equal_to(8)]))` |
+| `is_not` | A matcher for values that do not match `matcher`. | `@expect.expect(3).to(@expect.is_not(@expect.equal_to(4)))` |
+| `field` | A matcher that applies `f` to the value and checks the result with `matcher`: `field("name", u => u.name, equal_to("Ada"))`. | `@expect.expect((1, "a")).to(@expect.field("first", p => p.0, @expect.equal_to(1)))` |
+| `matching` | A matcher that runs method matchers on the value: `matching("an adult", it => it.to_be_greater_than_or_equal(18))`. | `@expect.expect(3).to(@expect.matching("positive", it => it.to_be_positive()))` |

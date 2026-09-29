@@ -167,6 +167,69 @@ becomes the path to that part, so a failure shows where the value came from:
 
 Navigation changes the value under test, so you cannot use it after `not()`.
 
+### Matcher values
+
+A `Matcher[T]` is a matcher as a value. Run one with `to`, combine several,
+or pass one to another matcher:
+
+```moonbit
+@expect.expect(age).to(@expect.all_of([
+  @expect.satisfying(a => a >= 18, description=">= 18"),
+  @expect.is_not(@expect.equal_to(99)),
+]))
+
+@expect.expect(users).to_contain_element_matching(
+  @expect.field("name", u => u.name, @expect.equal_to("Ada")),
+)
+```
+
+| Function | Matches values that |
+|---|---|
+| `equal_to(x)` | equal `x` |
+| `satisfying(pred, description?)` | satisfy `pred` |
+| `field(name, f, m)` | give a result that matches `m` when you apply `f` |
+| `all_of([m1, m2])` | match every matcher |
+| `any_of([m1, m2])` | match at least one matcher |
+| `is_not(m)` | do not match `m` |
+| `matching(description, block)` | pass the method matchers in `block` |
+
+`matching` makes every method matcher available as a matcher value:
+
+```moonbit
+@expect.expect(users).to_contain_element_matching(
+  @expect.field("age", u => u.age, @expect.matching("an adult", it => {
+    it.to_be_greater_than_or_equal(18)
+  })),
+)
+```
+
+A failure names each part that does not match:
+
+```text
+expect(received).to(matcher)
+Expected: all of (> 1, < 5, even)
+Received: 7
+Mismatch:
+  < 5: was 7
+  even: was 7
+```
+
+To write your own, build a `Matcher` with a struct literal. `describe` is
+called only for failure messages, and `check` returns `None` for a match or
+`Some(reason)` for a mismatch:
+
+```moonbit
+pub fn even() -> @expect.Matcher[Int] {
+  {
+    describe: () => "even",
+    check: x => if x % 2 == 0 { None } else { Some("was odd") },
+  }
+}
+```
+
+Unlike custom matcher methods, these functions can be public, so a package
+can share them.
+
 ### Many matchers on one value
 
 Matchers return `Unit`, so they do not chain. Use `all` to run several
