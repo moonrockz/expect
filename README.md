@@ -230,6 +230,34 @@ pub fn even() -> @expect.Matcher[Int] {
 Unlike custom matcher methods, these functions can be public, so a package
 can share them.
 
+### Property-based tests
+
+`for_all` checks a property for many generated values with
+`moonbitlang/core/quickcheck`. Write the property with matchers:
+
+```moonbit
+@expect.for_all((xs : Array[Int]) => {
+  @expect.expect(xs.rev().rev()).to_equal(xs)
+})
+```
+
+On failure, `for_all` shows the smallest counterexample that quickcheck
+finds, and the matcher failure for it:
+
+```text
+for_all(property) failed after 3 test(s)
+Counterexample: 50
+Shrinks:        26 successful, 37 attempted
+Failure:
+  src/math_test.mbt:3:46-3:75@me/app: expect(received).to_be_less_than(expected)
+  Expected: < 50
+  Received: 50
+```
+
+`count`, `max_size`, `max_shrinks` and `seed` are passed to
+`@quickcheck.check`. The value type must implement `@quickcheck.Arbitrary`
+and `@quickcheck.Shrink`.
+
 ### Soft assertions
 
 `expect_all` runs a block of assertions and reports every failure together,

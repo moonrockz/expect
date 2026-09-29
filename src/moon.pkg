@@ -14,6 +14,7 @@ import {
   "moonbitlang/core/list",
   "moonbitlang/core/priority_queue",
   "moonbitlang/core/queue",
+  "moonbitlang/core/quickcheck",
   "moonbitlang/core/sorted_map",
   "moonbitlang/core/sorted_set",
   "moonbitlang/core/string",
