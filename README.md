@@ -205,6 +205,28 @@ The function can return any type. When its return type is fully generic,
 for example `() => fail("boom")`, MoonBit cannot infer the type and warns.
 Give the function a type, or call a function that returns `Unit`.
 
+### Json
+
+`at` navigates into a `Json` value with a path such as `items[0].sku`. Keys
+are separated by `.`, and array indices are in brackets. The path appears
+in the failure headline. `to_contain_json` checks a subset: other keys are
+allowed, arrays must have the same length, and numbers compare by value.
+
+```moonbit
+let order : Json = { "id": 7, "items": [{ "sku": "A1", "qty": 2 }] }
+@expect.expect(order).at("items[0].sku").to_equal("A1")
+@expect.expect(order).to_contain_json({ "items": [{ "qty": 2 }] })
+```
+
+When a path does not exist, the failure shows the deepest part that does:
+
+```text
+expect(received).at(path)
+Expected: a value at "items[3].sku"
+Received: {"id":7,"items":[{"sku":"A1","qty":2}]}
+Found:    items is an array of length 1
+```
+
 ### Regular expressions
 
 `to_match` uses the regex syntax of `@string.Regex` from `moonbitlang/core`.
@@ -346,6 +368,9 @@ Diff (- expected, + received):
                     ^ first difference at index 7
   ```
 
+- `Bytes` values show as a hex dump, as `hexdump -C` does. When `to_equal`
+  fails on two `Bytes` values, a `Difference` line shows the first differing
+  offset.
 - When `to_equal` fails on two maps, the message lists the `Missing`,
   `Extra` and `Changed` keys instead of a line diff. Maps are equal in any
   order, so a line diff could show changes that are only a different order.

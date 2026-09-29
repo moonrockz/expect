@@ -121,8 +121,8 @@ test "to_any_satisfy and to_none_satisfy" {
     }),
     content=(
       #|expect(received).to_none_satisfy(predicate)
-      #|Expected:     no element to satisfy an even number
-      #|Received:     [1, 2, 3, 4]
+      #|Expected: no element to satisfy an even number
+      #|Received: [1, 2, 3, 4]
       #|Satisfied at:
       #|  index 1: 2
       #|  index 3: 4
@@ -136,8 +136,8 @@ test "to_all_satisfy lists every failing element" {
     failure(() => expect([1, 2, 3]).to_all_satisfy(x => x == 2)),
     content=(
       #|expect(received).to_all_satisfy(predicate)
-      #|Expected:  every element to satisfy predicate
-      #|Received:  [1, 2, 3]
+      #|Expected: every element to satisfy predicate
+      #|Received: [1, 2, 3]
       #|Failed at:
       #|  index 0: 1
       #|  index 2: 3

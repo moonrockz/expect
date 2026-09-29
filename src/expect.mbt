@@ -175,8 +175,13 @@ fn[T] Expectation::check_not_negated(
 }
 
 ///|
+/// Show a value with its `Debug` text. `Bytes` show as a hex dump.
 fn[T : @debug.Debug] show(value : T) -> String {
-  @debug.to_string(value)
+  let text = @debug.to_string(value)
+  match bytes_values(text) {
+    Some(bytes) if !bytes.is_empty() => hex_dump(bytes)
+    _ => text
+  }
 }
 
 ///|
@@ -213,7 +218,11 @@ let diff_name = "Diff (- expected, + received)"
 fn render_details(details : Array[(String, String)]) -> String {
   let width = details.fold(init=0, (width, detail) => {
     let length = detail.0.length()
-    if detail.0 != diff_name && detail.0 != "" && length > width {
+    // Names of values that start on their own line do not set the width.
+    let own_line = detail.0 == diff_name ||
+      detail.0 == "" ||
+      detail.1.contains("\n")
+    if !own_line && length > width {
       length
     } else {
       width
@@ -310,7 +319,11 @@ pub fn[T : Eq + @debug.Debug] Expectation::to_equal(
       }
       let expected_text = show(expected)
       let actual_text = show(self.actual)
-      if string_mismatch(expected_text, actual_text) is Some(m) {
+      let expected_debug = @debug.to_string(expected)
+      let actual_debug = @debug.to_string(self.actual)
+      if bytes_mismatch(expected_debug, actual_debug) is Some(difference) {
+        [("Difference", difference)]
+      } else if string_mismatch(expected_text, actual_text) is Some(m) {
         [("", " ".repeat(m.column) + "^ first difference at index \{m.index}")]
       } else if map_diff(expected_text, actual_text) is Some(details) {
         details
