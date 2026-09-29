@@ -101,7 +101,7 @@ test "basic assertions" {
   @expect.expect({ "a": 1, "b": 2 }).to_contain_entry("a", 1)
   @expect.expect({ "a": 1, "b": 2 }).to_contain_entries({ "b": 2 })
 
-  // Length (String, Array, FixedArray, Bytes, Map, Set)
+  // Length (String, Array, Map, Set, views, Deque, List, and the other core collections)
   @expect.expect("").to_be_empty()
   @expect.expect([1, 2, 3]).to_have_length(3)
 
@@ -388,6 +388,22 @@ a `Because` line:
 
 The reason stays through `not()` and navigation, and custom matchers show it
 too.
+
+### Other collections
+
+Array matchers take an `Array`. For any other collection, use
+`expect_elements` with its `iter()`, and all Array matchers and navigation
+methods work:
+
+```moonbit
+@expect.expect_elements(deque.iter()).to_contain_element(3)
+@expect.expect_elements(sorted_set.iter()).first().to_equal(1)
+```
+
+`to_be_empty` and `to_have_length` work on the core collections directly:
+`ArrayView`, `StringView`, `BytesView`, `Deque`, `List`, `Queue`,
+`PriorityQueue`, `HashMap`, `HashSet`, `SortedMap`, `SortedSet`, and the
+`@immut` maps, sets, vectors and priority queue.
 
 ### Custom types with a length
 
