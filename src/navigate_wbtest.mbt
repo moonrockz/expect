@@ -121,6 +121,7 @@ test "single" {
 
 ///|
 test "value_at navigates to a map value" {
+  expect({ "http": 80 }).value_at("http").to_equal(80)
   let ports = { "http": 80, "https": 443 }
   expect(ports).value_at("http").to_equal(80)
   inspect(
@@ -157,6 +158,7 @@ test "fst and snd navigate into a pair" {
 
 ///|
 test "all runs every matcher on one value" {
+  expect(3).all(it => it.to_be_positive())
   expect(42).all(it => {
     it.to_be_greater_than(0)
     it.to_be_less_than(100)

@@ -7,6 +7,7 @@ let order : Json = {
 
 ///|
 test "at navigates to a value" {
+  expect(({ "a": [{ "b": 1 }] } : Json)).at("a[0].b").to_equal(1)
   expect(order).at("id").to_equal(7)
   expect(order).at("customer.name").to_equal("Ada")
   expect(order).at("customer.tags[1]").to_equal("early")
@@ -61,6 +62,7 @@ test "at fails on a missing path and shows the deepest part that exists" {
 
 ///|
 test "to_contain_json" {
+  expect(({ "id": 7, "qty": 2 } : Json)).to_contain_json({ "id": 7 })
   expect(order).to_contain_json({ "id": 7 })
   expect(order).to_contain_json({ "customer": { "name": "Ada" } })
   expect(order).to_contain_json({ "items": [{ "sku": "A1" }, { "qty": 1 }] })

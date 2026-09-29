@@ -16,6 +16,7 @@ fn parse_number(text : String) -> Int raise ParseError {
 
 ///|
 test "expect_call accepts functions that return a value" {
+  expect_call(() => @string.parse_int("x")).to_raise()
   expect_call(() => parse_number("x")).to_raise()
   expect_call(() => parse_number("1")).not().to_raise()
   expect_call(() => parse_number("") |> ignore).to_raise()
@@ -23,6 +24,7 @@ test "expect_call accepts functions that return a value" {
 
 ///|
 test "to_return" {
+  expect_call(() => @string.parse_int("42")).to_return().to_equal(42)
   expect_call(() => parse_number("42")).to_return().to_equal(42)
   inspect(
     failure(() => {
@@ -55,6 +57,7 @@ test "to_return" {
 
 ///|
 test "to_raise_error" {
+  expect_call(() => fails("x")).to_raise_error().message().to_equal("x")
   expect_call(() => parse_number("x"))
   .to_raise_error()
   .message()

@@ -339,6 +339,10 @@ test "Option matchers" {
 test "Result matchers" {
   let ok : Result[Int, String] = Ok(1)
   let err : Result[Int, String] = Err("boom")
+  expect((Ok(1) : Result[Int, String])).to_be_ok()
+  expect((Err("boom") : Result[Int, String])).to_be_err()
+  expect((Ok(1) : Result[Int, String])).unwrap_ok().to_equal(1)
+  expect((Err("boom") : Result[Int, String])).unwrap_err().to_equal("boom")
   expect(ok).to_be_ok()
   expect(err).to_be_err()
   expect(ok).not().to_be_err()
@@ -542,6 +546,7 @@ test "array matchers" {
 
 ///|
 test "to_contain_key" {
+  expect({ "a": 1 }).to_contain_key("a")
   let m = { "a": 1 }
   expect(m).to_contain_key("a")
   expect(m).not().to_contain_key("b")

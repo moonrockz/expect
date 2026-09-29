@@ -244,8 +244,10 @@ pub fn[F : FloatingPoint] Expectation::to_be_finite(
 }
 
 ///|
-/// Assert the actual value is close to `expected`. NaN is never close to any
-/// value. Give at most one tolerance:
+/// Assert the actual value is close to `expected`, within an absolute,
+/// relative or ULP tolerance. NaN is never close to any value.
+///
+/// Give at most one tolerance:
 ///
 /// - `tolerance`: the largest absolute difference. This is the default, with
 ///   `1.0e-9`.

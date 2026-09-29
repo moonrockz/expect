@@ -18,6 +18,9 @@ import {
 
 ## Usage
 
+[docs/matchers.md](docs/matchers.md) lists every matcher, grouped by the type
+of the value under test, with an example of each.
+
 ```moonbit
 test "basic assertions" {
   // Equality
@@ -461,6 +464,12 @@ Formatting does not change comparison: matchers still use `Eq`. If two values
 differ only in a field that you hide, the assertion fails but the message
 shows no difference. Hide a field only when it cannot be the cause of a
 failure, or give it a short form, such as its length, instead of `...`.
+
+## Development
+
+Run the tests with `moon test`. After you add or change a public matcher,
+run `mise run docs:catalog` to update `docs/matchers.md`. CI fails when the
+catalog is out of date.
 
 ## License
 
