@@ -450,49 +450,6 @@ pub fn[T : Compare + @debug.Debug] Expectation::to_be_less_than_or_equal(
 }
 
 ///|
-/// Assert the actual value is between `low` and `high`, inclusive.
-#callsite(autofill(loc))
-pub fn[T : Compare + @debug.Debug] Expectation::to_be_between(
-  self : Expectation[T],
-  low : T,
-  high : T,
-  loc~ : SourceLoc,
-) -> Unit raise Error {
-  self.assert_that(
-    low <= self.actual && self.actual <= high,
-    "to_be_between",
-    args="low, high",
-    expected=() => "between \{show(low)} and \{show(high)} (inclusive)",
-    received=() => show(self.actual),
-    loc~,
-  )
-}
-
-///|
-/// Assert the actual Double is within `tolerance` of the expected value.
-/// NaN is never close to any value.
-#callsite(autofill(loc))
-pub fn Expectation::to_be_close_to(
-  self : Expectation[Double],
-  expected : Double,
-  tolerance? : Double = 1.0e-9,
-  loc~ : SourceLoc,
-) -> Unit raise Error {
-  let difference = (self.actual - expected).abs()
-  self.assert_that(
-    difference <= tolerance,
-    "to_be_close_to",
-    args="expected, tolerance",
-    expected=() => {
-      "within \{show_double(tolerance)} of \{show_double(expected)}"
-    },
-    received=() => show_double(self.actual),
-    details=() => [("Difference", show_double(difference))],
-    loc~,
-  )
-}
-
-///|
 /// Assert the actual Option value is Some.
 #callsite(autofill(loc))
 pub fn[T] Expectation::to_be_some(
