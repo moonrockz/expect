@@ -59,6 +59,22 @@ test "basic assertions" {
   @expect.expect([1, 2, 3]).to_contain_all([3, 1])
   @expect.expect([3, 1, 2]).to_equal_ignoring_order([1, 2, 3])
   @expect.expect([2, 4, 6]).to_all_satisfy(x => x % 2 == 0)
+  @expect.expect([1, 2, 3]).to_contain_exactly([1, 2, 3]) // same order
+  @expect.expect([1, 2, 2]).to_contain_only([2, 1]) // any order, repeats allowed
+  @expect.expect([1, 2, 3]).to_contain_in_order([1, 3]) // gaps allowed
+  @expect.expect([1, 2, 3]).to_start_with_elements([1, 2])
+  @expect.expect([1, 2, 3]).to_end_with_elements([3])
+  @expect.expect([1, 2, 3]).to_contain_none_of([4, 5])
+  @expect.expect([1, 2, 3]).to_any_satisfy(x => x > 2)
+  @expect.expect([1, 2, 3]).to_none_satisfy(x => x > 3)
+  @expect.expect([1, 2, 3, 4]).to_have_count_satisfying(2, x => x % 2 == 0)
+  @expect.expect([1, 2, 2]).to_be_sorted()
+  @expect.expect(["a", "bb"]).to_be_sorted_by(s => s.length())
+  @expect.expect([1, 2, 3]).to_have_no_duplicates()
+  @expect.expect([1, 5]).to_satisfy_respectively([
+    it => it.to_equal(1),
+    it => it.to_be_greater_than(2),
+  ])
 
   // Maps
   @expect.expect({ "a": 1 }).to_contain_key("a")

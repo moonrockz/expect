@@ -825,18 +825,18 @@ pub fn[T : @debug.Debug] Expectation::to_all_satisfy(
   description? : String = "predicate",
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  let failed_index = self.actual.search_by(e => !predicate(e))
+  let failed = indices_where(self.actual, e => !predicate(e))
   self.assert_that(
-    failed_index is None,
+    failed.is_empty(),
     "to_all_satisfy",
     args="predicate",
     expected=() => "every element to satisfy \{description}",
     received=() => show(self.actual),
     details=() => {
-      match failed_index {
-        Some(index) =>
-          [("Failed at", "index \{index}: \{show(self.actual[index])}")]
-        None => []
+      if failed.is_empty() {
+        []
+      } else {
+        [("Failed at", show_indexed(self.actual, failed))]
       }
     },
     loc~,
