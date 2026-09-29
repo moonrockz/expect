@@ -15,14 +15,15 @@ pub fn[T] expect(actual : T, label? : String = "") -> Expectation[T] {
 }
 
 ///|
-/// Create an expectation on a function, for use with `to_raise`.
+/// Create an expectation on a function, for use with `to_raise`, `to_return`,
+/// `to_raise_error` and `to_raise_matching`.
 ///
 /// Use an arrow function so that MoonBit infers the error type:
 /// `expect_call(() => parse("bad")).to_raise()`.
-pub fn expect_call(
-  f : () -> Unit raise Error,
+pub fn[T] expect_call(
+  f : () -> T raise Error,
   label? : String = "",
-) -> Expectation[() -> Unit raise Error] {
+) -> Expectation[() -> T raise Error] {
   { actual: f, negated: false, label, }
 }
 
@@ -600,16 +601,12 @@ pub fn[T : @debug.Debug, E] Expectation::unwrap_err(
 /// Negated, the assertion fails only when the function raises an error that
 /// matches.
 #callsite(autofill(loc))
-pub fn Expectation::to_raise(
-  self : Expectation[() -> Unit raise Error],
+pub fn[T] Expectation::to_raise(
+  self : Expectation[() -> T raise Error],
   containing? : String,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
-  let raised : Error? = try (self.actual)() catch {
-    error => Some(error)
-  } noraise {
-    _ => None
-  }
+  let raised = self.call()
   let pass = match (raised, containing) {
     (Some(error), Some(text)) => error.to_string().contains(text)
     (Some(_), None) => true
@@ -625,12 +622,7 @@ pub fn Expectation::to_raise(
         None => "an error"
       }
     },
-    received=() => {
-      match raised {
-        Some(error) => "error \{show(describe_error(error))}"
-        None => "no error"
-      }
-    },
+    received=() => describe_raised(raised),
     loc~,
   )
 }

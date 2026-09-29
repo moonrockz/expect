@@ -379,10 +379,10 @@ test "Result matchers" {
 
 ///|
 test "to_raise" {
-  expect_call(() => fail("boom")).to_raise()
+  expect_call(() => fails("boom")).to_raise()
   expect_call(() => ()).not().to_raise()
-  expect_call(() => fail("disk full")).to_raise(containing="disk full")
-  expect_call(() => fail("disk full")).not().to_raise(containing="timeout")
+  expect_call(() => fails("disk full")).to_raise(containing="disk full")
+  expect_call(() => fails("disk full")).not().to_raise(containing="timeout")
   expect_call(() => ()).not().to_raise(containing="timeout")
   inspect(
     failure(() => expect_call(() => ()).to_raise()),
@@ -393,7 +393,7 @@ test "to_raise" {
     ),
   )
   inspect(
-    failure(() => expect_call(() => fail("boom")).not().to_raise()),
+    failure(() => expect_call(() => fails("boom")).not().to_raise()),
     content=(
       #|expect(received).not.to_raise()
       #|Expected: not an error
@@ -402,7 +402,7 @@ test "to_raise" {
   )
   inspect(
     failure(() => {
-      expect_call(() => fail("disk full")).to_raise(containing="timeout")
+      expect_call(() => fails("disk full")).to_raise(containing="timeout")
     }),
     content=(
       #|expect(received).to_raise(containing)
@@ -412,7 +412,7 @@ test "to_raise" {
   )
   inspect(
     failure(() => {
-      expect_call(() => fail("disk full")).not().to_raise(containing="disk")
+      expect_call(() => fails("disk full")).not().to_raise(containing="disk")
     }),
     content=(
       #|expect(received).not.to_raise(containing)
