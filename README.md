@@ -230,6 +230,41 @@ pub fn even() -> @expect.Matcher[Int] {
 Unlike custom matcher methods, these functions can be public, so a package
 can share them.
 
+### Soft assertions
+
+`expect_all` runs a block of assertions and reports every failure together,
+instead of stopping at the first one. Create expectations with `s.expect` or
+`s.expect_call`:
+
+```moonbit
+@expect.expect_all(s => {
+  s.expect(user.name).to_equal("Ada")
+  s.expect(user.age).to_be_greater_than(18)
+  s.expect(user.tags).first().to_equal("admin")
+})
+```
+
+```text
+2 of 3 assertions failed
+
+(1) src/user_test.mbt:12:3-12:40@me/app: expect(received).to_equal(expected)
+    Expected: "Ada"
+    Received: "Bob"
+
+(2) src/user_test.mbt:13:3-13:45@me/app: expect(received).to_be_greater_than(expected)
+    Expected: > 18
+    Received: 17
+```
+
+- The scope carries through `not()`, `because`, navigation and `all`, and
+  custom matchers built on `assert_that` collect their failures too.
+- A failure that leaves no value to go on with, such as `unwrap_some` on
+  `None`, stops the block. So does any other error, for example a plain
+  `@expect.expect` that fails in the block. The report says which failure
+  stopped the block.
+- `s.expect_all(inner => ...)` runs a nested scope. Its failures join the
+  outer list, and when the nested block stops, the outer block goes on.
+
 ### Equivalence
 
 `to_be_equivalent_to` compares two values field by field, and lists each

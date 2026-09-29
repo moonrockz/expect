@@ -6,6 +6,8 @@ pub struct Expectation[T] {
   label : String
   /// Why the assertion must hold. Failures show it on a `Because` line.
   reason : String
+  /// The soft-assertion scope that collects failures, if any.
+  scope : Scope?
 }
 
 ///|
@@ -13,7 +15,7 @@ pub struct Expectation[T] {
 ///
 /// When `label` is not empty, failure messages start with `"<label>: "`.
 pub fn[T] expect(actual : T, label? : String = "") -> Expectation[T] {
-  { actual, negated: false, label, reason: "", }
+  { actual, negated: false, label, reason: "", scope: None, }
 }
 
 ///|
@@ -26,7 +28,7 @@ pub fn[T] expect_call(
   f : () -> T raise Error,
   label? : String = "",
 ) -> Expectation[() -> T raise Error] {
-  { actual: f, negated: false, label, reason: "", }
+  { actual: f, negated: false, label, reason: "", scope: None, }
 }
 
 ///|
@@ -46,7 +48,13 @@ fn[T, U] Expectation::with_value(
   self : Expectation[T],
   value : U,
 ) -> Expectation[U] {
-  { actual: value, negated: false, label: self.label, reason: self.reason, }
+  {
+    actual: value,
+    negated: false,
+    label: self.label,
+    reason: self.reason,
+    scope: self.scope,
+  }
 }
 
 ///|
@@ -77,8 +85,16 @@ fn[T] Expectation::verify(
   details : () -> Array[(String, String)],
   loc : SourceLoc,
 ) -> Unit raise Error {
+  if self.scope is Some(scope) {
+    scope.state.assertions += 1
+  }
   if pass == self.negated {
-    self.report(matcher, args, details(), loc)
+    let message = self.failure_message(matcher, args, details())
+    match self.scope {
+      // In a soft-assertion scope, record the failure and go on.
+      Some(scope) => scope.record(loc.to_string(), message)
+      None => fail(message, loc~)
+    }
   }
 }
 
@@ -130,13 +146,13 @@ pub fn[T] Expectation::assert_that(
 }
 
 ///|
-fn[T, U] Expectation::report(
+/// The failure message: the headline and the details.
+fn[T] Expectation::failure_message(
   self : Expectation[T],
   matcher : String,
   args : String,
   details : Array[(String, String)],
-  loc : SourceLoc,
-) -> U raise Error {
+) -> String {
   let label = if self.label.is_empty() { "" } else { "\{self.label}: " }
   let not_ = if self.negated { ".not" } else { "" }
   let headline = "\{label}expect(received)\{not_}.\{matcher}(\{args})"
@@ -145,7 +161,28 @@ fn[T, U] Expectation::report(
   } else {
     [..details, ("Because", self.reason)]
   }
-  fail("\{headline}\n\{render_details(details)}", loc~)
+  "\{headline}\n\{render_details(details)}"
+}
+
+///|
+/// Raise a failure. In a soft-assertion scope, record the failure and stop
+/// the block, because the caller cannot go on without a value.
+fn[T, U] Expectation::report(
+  self : Expectation[T],
+  matcher : String,
+  args : String,
+  details : Array[(String, String)],
+  loc : SourceLoc,
+) -> U raise Error {
+  let message = self.failure_message(matcher, args, details)
+  match self.scope {
+    Some(scope) => {
+      scope.state.assertions += 1
+      scope.record(loc.to_string(), message)
+      raise ScopeStopped
+    }
+    None => fail(message, loc~)
+  }
 }
 
 ///|

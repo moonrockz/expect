@@ -22,7 +22,13 @@ fn[T, U] Expectation::navigate(
   } else {
     "\{self.label}.\{segment}"
   }
-  { actual: value, negated: false, label, reason: self.reason, }
+  {
+    actual: value,
+    negated: false,
+    label,
+    reason: self.reason,
+    scope: self.scope,
+  }
 }
 
 ///|
