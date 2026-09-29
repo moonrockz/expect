@@ -4,6 +4,8 @@ pub struct Expectation[T] {
   actual : T
   negated : Bool
   label : String
+  /// Why the assertion must hold. Failures show it on a `Because` line.
+  reason : String
 }
 
 ///|
@@ -11,7 +13,7 @@ pub struct Expectation[T] {
 ///
 /// When `label` is not empty, failure messages start with `"<label>: "`.
 pub fn[T] expect(actual : T, label? : String = "") -> Expectation[T] {
-  { actual, negated: false, label, }
+  { actual, negated: false, label, reason: "", }
 }
 
 ///|
@@ -24,7 +26,27 @@ pub fn[T] expect_call(
   f : () -> T raise Error,
   label? : String = "",
 ) -> Expectation[() -> T raise Error] {
-  { actual: f, negated: false, label, }
+  { actual: f, negated: false, label, reason: "", }
+}
+
+///|
+/// Give the reason why the assertion must hold. A failure shows the reason
+/// on a `Because` line:
+/// `expect(retries).because("the client retries three times").to_equal(3)`.
+pub fn[T] Expectation::because(
+  self : Expectation[T],
+  reason : String,
+) -> Expectation[T] {
+  { ..self, reason, }
+}
+
+///|
+/// An expectation on `value` that keeps the label and the reason.
+fn[T, U] Expectation::with_value(
+  self : Expectation[T],
+  value : U,
+) -> Expectation[U] {
+  { actual: value, negated: false, label: self.label, reason: self.reason, }
 }
 
 ///|
@@ -118,6 +140,11 @@ fn[T, U] Expectation::report(
   let label = if self.label.is_empty() { "" } else { "\{self.label}: " }
   let not_ = if self.negated { ".not" } else { "" }
   let headline = "\{label}expect(received)\{not_}.\{matcher}(\{args})"
+  let details = if self.reason.is_empty() {
+    details
+  } else {
+    [..details, ("Because", self.reason)]
+  }
   fail("\{headline}\n\{render_details(details)}", loc~)
 }
 
@@ -491,7 +518,7 @@ pub fn[T] Expectation::unwrap_some(
 ) -> Expectation[T] raise Error {
   self.check_not_negated("unwrap_some", loc)
   match self.actual {
-    Some(value) => { actual: value, negated: false, label: self.label, }
+    Some(value) => self.with_value(value)
     None =>
       self.report(
         "unwrap_some",
@@ -544,7 +571,7 @@ pub fn[T, E : @debug.Debug] Expectation::unwrap_ok(
 ) -> Expectation[T] raise Error {
   self.check_not_negated("unwrap_ok", loc)
   match self.actual {
-    Ok(value) => { actual: value, negated: false, label: self.label, }
+    Ok(value) => self.with_value(value)
     Err(error) =>
       self.report(
         "unwrap_ok",
@@ -565,7 +592,7 @@ pub fn[T : @debug.Debug, E] Expectation::unwrap_err(
 ) -> Expectation[E] raise Error {
   self.check_not_negated("unwrap_err", loc)
   match self.actual {
-    Err(error) => { actual: error, negated: false, label: self.label, }
+    Err(error) => self.with_value(error)
     Ok(value) =>
       self.report(
         "unwrap_err",

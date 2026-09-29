@@ -37,7 +37,7 @@ pub fn[T] Expectation::to_return(
         loc,
       )
   }
-  { actual: value, negated: false, label: self.label, }
+  self.with_value(value)
 }
 
 ///|
@@ -51,7 +51,7 @@ pub fn[T] Expectation::to_raise_error(
 ) -> Expectation[Error] raise Error {
   self.check_not_negated("to_raise_error", loc)
   match self.call() {
-    Some(error) => { actual: error, negated: false, label: self.label, }
+    Some(error) => self.with_value(error)
     None =>
       self.report(
         "to_raise_error",
