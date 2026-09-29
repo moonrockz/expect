@@ -241,3 +241,138 @@ fn line_diff(expected : String, actual : String) -> String? {
   }
   Some(builder.to_string().trim_end(chars="\n").to_owned())
 }
+
+// Map differences
+//
+// Maps compare equal in any order, so a line diff of two maps can show
+// changes that are only a different order. For maps, `to_equal` lists the
+// missing, extra and changed keys instead.
+
+///|
+/// Write `doc` on one line, as `Debug` does.
+fn write_compact(builder : StringBuilder, doc : Doc) -> Unit {
+  match doc {
+    Text(content) => builder.write_string(content)
+    Group(open, items, close) => {
+      builder.write_char(open)
+      let pad = if open == '{' && !items.is_empty() { " " } else { "" }
+      builder.write_string(pad)
+      for i, item in items {
+        if i > 0 {
+          builder.write_string(", ")
+        }
+        for part in item {
+          write_compact(builder, part)
+        }
+      }
+      builder.write_string(pad)
+      builder.write_char(close)
+    }
+  }
+}
+
+///|
+/// Split `key: value` at the first `:` outside a string or char literal.
+fn split_key(text : String) -> (String, String)? {
+  let chars = text.to_array()
+  let mut i = 0
+  while i < chars.length() {
+    let c = chars[i]
+    if c == '"' || c == '\'' {
+      i += 1
+      while i < chars.length() && chars[i] != c {
+        i += if chars[i] == '\\' { 2 } else { 1 }
+      }
+      i += 1
+    } else if c == ':' {
+      let key = String::from_array(chars[:i])
+      let value = String::from_array(chars[i + 1:])
+      return Some((key, value.trim_start(chars=" ").to_owned()))
+    } else {
+      i += 1
+    }
+  }
+  None
+}
+
+///|
+/// A record field name, such as `x` or `user_id`. Map keys in `Debug` text
+/// are quoted, numbers or constructors, so they are never field names.
+fn is_field_name(key : String) -> Bool {
+  let chars = key.to_array()
+  guard chars is [first, ..] && (first == '_' || (first >= 'a' && first <= 'z')) else {
+    return false
+  }
+  chars
+  .iter()
+  .all(c => c == '_' || c.is_ascii_alphabetic() || c.is_ascii_digit())
+}
+
+///|
+/// The entries of `{ key: value, ... }` text as key and value text, and
+/// whether a key shows that the text is a map, not a record. Return `None`
+/// for other text.
+fn map_entries(text : String) -> (Array[(String, String)], Bool)? {
+  let (items, _) = parse_items(text.to_array(), 0, None)
+  guard items is [[Group('{', entries, '}')]] else { return None }
+  let result = []
+  let mut is_map = false
+  for entry in entries {
+    guard entry is [Text(first), .. rest] else { return None }
+    guard split_key(first) is Some((key, value_start)) else { return None }
+    if !is_field_name(key) {
+      is_map = true
+    }
+    let value = StringBuilder()
+    value.write_string(value_start)
+    for doc in rest {
+      write_compact(value, doc)
+    }
+    result.push((key, value.to_string()))
+  }
+  Some((result, is_map))
+}
+
+///|
+/// The missing, extra and changed keys from `expected` to `actual`, both
+/// `Debug` text of maps. Return `None` when the text is not two maps.
+fn map_diff(expected : String, actual : String) -> Array[(String, String)]? {
+  guard map_entries(expected) is Some((expected_entries, expected_is_map)) &&
+    map_entries(actual) is Some((actual_entries, actual_is_map)) &&
+    (expected_is_map || actual_is_map) else {
+    return None
+  }
+  let find = (entries : Array[(String, String)], key : String) => {
+    entries.search_by(entry => entry.0 == key).map(i => entries[i].1)
+  }
+  let as_map = (entries : Array[(String, String)]) => {
+    "{ " + entries.map(entry => "\{entry.0}: \{entry.1}").join(", ") + " }"
+  }
+  let missing = expected_entries.filter(entry => {
+    find(actual_entries, entry.0) is None
+  })
+  let extra = actual_entries.filter(entry => {
+    find(expected_entries, entry.0) is None
+  })
+  let changed = []
+  for entry in expected_entries {
+    if find(actual_entries, entry.0) is Some(value) && value != entry.1 {
+      changed.push("\{entry.0}: expected \{entry.1}, received \{value}")
+    }
+  }
+  let details = []
+  if !missing.is_empty() {
+    details.push(("Missing", as_map(missing)))
+  }
+  if !extra.is_empty() {
+    details.push(("Extra", as_map(extra)))
+  }
+  if !changed.is_empty() {
+    details.push(("Changed", changed.join("\n")))
+  }
+  if details.is_empty() {
+    None
+  } else {
+    Some(details)
+  }
+}

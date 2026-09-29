@@ -260,8 +260,14 @@ pub fn[T : Eq + @debug.Debug] Expectation::to_equal(
     expected=() => show(expected),
     received=() => show(self.actual),
     details=() => {
-      if !self.negated &&
-        line_diff(show(expected), show(self.actual)) is Some(diff) {
+      if self.negated {
+        return []
+      }
+      let expected_text = show(expected)
+      let actual_text = show(self.actual)
+      if map_diff(expected_text, actual_text) is Some(details) {
+        details
+      } else if line_diff(expected_text, actual_text) is Some(diff) {
         [(diff_name, diff)]
       } else {
         []
