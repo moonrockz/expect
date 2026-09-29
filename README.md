@@ -53,6 +53,12 @@ test "basic assertions" {
   @expect.expect("hello world").to_start_with("hello")
   @expect.expect("hello world").to_end_with("world")
   @expect.expect("order 42").to_match("[[:digit:]]+") // regex search
+  @expect.expect("42").to_match_fully("[[:digit:]]+") // whole string
+  @expect.expect("Hello").to_equal_ignoring_case("hello")
+  @expect.expect("a b\nc").to_equal_ignoring_whitespace("abc")
+  @expect.expect(" \t").to_be_blank()
+  @expect.expect("a-b-c").to_contain_times("-", 2)
+  @expect.expect("one two three").to_contain_substrings_in_order(["one", "three"])
 
   // Arrays
   @expect.expect([1, 2, 3]).to_contain_element(2)
@@ -293,6 +299,15 @@ Diff (- expected, + received):
   per line, so the diff shows exactly which fields changed. Unchanged lines
   far from a change are left out, and each group of changes gets its own
   `@@` hunk header. For long values, only the diff is shown.
+- When `to_equal` fails on two single-line strings, a caret points at the
+  first difference. Long strings are cut to the text around it:
+
+  ```text
+  Expected: "hello world"
+  Received: "hello wurld"
+                    ^ first difference at index 7
+  ```
+
 - When `to_equal` fails on two maps, the message lists the `Missing`,
   `Extra` and `Changed` keys instead of a line diff. Maps are equal in any
   order, so a line diff could show changes that are only a different order.
