@@ -104,6 +104,15 @@ test "basic assertions" {
 
   // Any value
   @expect.expect(4).to_satisfy(x => x % 2 == 0, description="is even")
+  @expect.expect(2).to_be_one_of([1, 2, 3])
+  @expect.expect(2).to_be_in(Set([1, 2, 3]))
+
+  // Chars (ASCII, except to_be_whitespace)
+  @expect.expect('7').to_be_digit()
+  @expect.expect('a').to_be_letter()
+  @expect.expect(' ').to_be_whitespace()
+  @expect.expect('A').to_be_upper_case()
+  @expect.expect('a').to_be_lower_case()
 }
 ```
 
@@ -211,6 +220,25 @@ Give `expect` a label to add context to failure messages:
 // Fails with: user id: expect(received).to_equal(expected) ...
 @expect.expect(3, label="user id").to_equal(5)
 ```
+
+### Reasons
+
+`because` gives the reason why an assertion must hold. A failure shows it on
+a `Because` line:
+
+```moonbit
+// Fails with:
+// retries: expect(received).to_equal(expected)
+// Expected: 4
+// Received: 3
+// Because:  the client retries three times
+@expect.expect(3, label="retries")
+.because("the client retries three times")
+.to_equal(4)
+```
+
+The reason stays through `not()` and navigation, and custom matchers show it
+too.
 
 ### Custom types with a length
 
