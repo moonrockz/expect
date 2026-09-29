@@ -34,10 +34,20 @@ test "basic assertions" {
   @expect.expect(3).to_be_less_than(5)
   @expect.expect(3).to_be_less_than_or_equal(3)
   @expect.expect(3).to_be_between(1, 5) // inclusive
+  @expect.expect(4).to_be_between(1, 5, high_inclusive=false)
 
-  // Doubles
+  // Signs (Int, Int16, Int64, UInt, UInt16, UInt64, Double, Float)
+  @expect.expect(3).to_be_positive()
+  @expect.expect(-3).to_be_negative()
+  @expect.expect(0).to_be_zero()
+
+  // Floating-point numbers (Double and Float)
   @expect.expect(0.1 + 0.2).to_be_close_to(0.3) // default tolerance 1e-9
-  @expect.expect(1.0).to_be_close_to(1.05, tolerance=0.1)
+  @expect.expect(1.0).to_be_close_to(1.05, tolerance=0.1) // absolute
+  @expect.expect(1000.0).to_be_close_to(1001.0, relative=0.01) // 1%
+  @expect.expect(1.0).to_be_close_to(1.0000000000000002, ulps=1)
+  @expect.expect(0.0 / 0.0).to_be_nan()
+  @expect.expect(1.0).to_be_finite()
 
   // Options
   @expect.expect(Some(42)).to_be_some()
