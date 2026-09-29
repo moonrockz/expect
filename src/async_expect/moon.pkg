@@ -1,0 +1,11 @@
+import {
+  "moonbitlang/async",
+}
+
+supported_targets = "native+js+wasm"
+
+import {
+  "moonbitlang/async",
+  "moonrockz/expect",
+  "moonrockz/expect/async_expect",
+} for "test"

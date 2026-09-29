@@ -13,3 +13,7 @@ keywords = [ "testing", "assertions", "expect", "matchers" ]
 description = "A fluent assertion library for MoonBit"
 
 source = "src/"
+
+import {
+  "moonbitlang/async@0.22.4",
+}
