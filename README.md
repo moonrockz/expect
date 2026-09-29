@@ -78,6 +78,9 @@ test "basic assertions" {
 
   // Maps
   @expect.expect({ "a": 1 }).to_contain_key("a")
+  @expect.expect({ "a": 1 }).to_contain_value(1)
+  @expect.expect({ "a": 1, "b": 2 }).to_contain_entry("a", 1)
+  @expect.expect({ "a": 1, "b": 2 }).to_contain_entries({ "b": 2 })
 
   // Length (String, Array, FixedArray, Bytes, Map, Set)
   @expect.expect("").to_be_empty()
@@ -290,6 +293,9 @@ Diff (- expected, + received):
   per line, so the diff shows exactly which fields changed. Unchanged lines
   far from a change are left out, and each group of changes gets its own
   `@@` hunk header. For long values, only the diff is shown.
+- When `to_equal` fails on two maps, the message lists the `Missing`,
+  `Extra` and `Changed` keys instead of a line diff. Maps are equal in any
+  order, so a line diff could show changes that are only a different order.
 - Values that span more than one line start on their own line. Values longer
   than 30 lines are shortened.
 - A negated matcher shows `.not` in the first line and `not` in the
