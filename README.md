@@ -230,6 +230,29 @@ pub fn even() -> @expect.Matcher[Int] {
 Unlike custom matcher methods, these functions can be public, so a package
 can share them.
 
+### Snapshots
+
+This library has no snapshot matcher, because MoonBit's own snapshot tests
+already do the job, and `moon test --update` writes the snapshots for you:
+
+```moonbit
+test "order summary" {
+  // Inline snapshot of the `Show` output. `--update` fills in `content`.
+  inspect(summary(order), content="3 items, $12.50")
+  // Inline snapshot of the `Debug` output, for any type that derives Debug.
+  @debug.debug_inspect(order.items, content="...")
+}
+
+test "report" (it : @test.T) {
+  // File snapshot, stored in __snapshot__/report.txt.
+  it.writeln(render_report(data))
+  it.snapshot(filename="report.txt")
+}
+```
+
+Use snapshots for large outputs that you review as a whole, and matchers for
+the facts that must hold. You can use both in the same test.
+
 ### Property-based tests
 
 `for_all` checks a property for many generated values with
