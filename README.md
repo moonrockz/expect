@@ -258,6 +258,39 @@ Failure:
 `@quickcheck.check`. The value type must implement `@quickcheck.Arbitrary`
 and `@quickcheck.Shrink`.
 
+### Async code
+
+`moonrockz/expect/async_expect` has `eventually`, which retries a block of
+assertions until it passes or a timeout runs out. It depends on
+`moonbitlang/async`, so it is a separate package: import it only when you
+need it. It supports the native, js and wasm targets.
+
+```moonbit
+import {
+  "moonrockz/expect",
+  "moonrockz/expect/async_expect",
+} for "test"
+```
+
+```moonbit
+async test "worker drains the queue" {
+  start_worker(queue)
+  @async_expect.eventually(() => @expect.expect(queue.length()).to_equal(0))
+  // timeout=1000 and interval=50 milliseconds by default
+}
+```
+
+When the time runs out, the failure shows the number of attempts and the
+last failure:
+
+```text
+eventually(block) did not pass within 1000 ms (20 attempts)
+Last failure:
+  src/worker_test.mbt:3:45-3:78@me/app: expect(received).to_equal(expected)
+  Expected: 0
+  Received: 2
+```
+
 ### Soft assertions
 
 `expect_all` runs a block of assertions and reports every failure together,
