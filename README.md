@@ -96,6 +96,42 @@ expectation on the inner value. You cannot use them after `not()`.
 statement ignore a returned value, so a return value would break code that
 uses `to_be_some` as a statement.
 
+### Navigation
+
+Navigation methods return an expectation on a part of the value. The label
+becomes the path to that part, so a failure shows where the value came from:
+
+```moonbit
+// Fails with: user.address.city: expect(received).to_equal(expected) ...
+@expect.expect(user, label="user")
+.get("address", u => u.address)
+.get("city", a => a.city)
+.to_equal("Paris")
+```
+
+| Method | On | Returns an expectation on | Fails when |
+|---|---|---|---|
+| `get(name, f)` | any value | `f(value)` | never |
+| `element(i)` | `Array` | the element at index `i` | `i` is out of range |
+| `first()`, `last()` | `Array` | the first or last element | the array is empty |
+| `single()` | `Array` | the only element | the array does not have exactly one element |
+| `value_at(key)` | `Map` | the value for `key` | the key is missing |
+| `fst()`, `snd()` | pair | the first or second part | never |
+
+Navigation changes the value under test, so you cannot use it after `not()`.
+
+### Many matchers on one value
+
+Matchers return `Unit`, so they do not chain. Use `all` to run several
+matchers on the same value:
+
+```moonbit
+@expect.expect(age).all(it => {
+  it.to_be_greater_than(0)
+  it.to_be_less_than(150)
+})
+```
+
 ### Errors
 
 Use `expect_call` with an arrow function to assert that code raises:
