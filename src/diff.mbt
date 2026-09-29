@@ -376,3 +376,120 @@ fn map_diff(expected : String, actual : String) -> Array[(String, String)]? {
     Some(details)
   }
 }
+
+// Single-line strings
+//
+// A line diff does not help when both values are short strings. Instead,
+// `to_equal` puts a caret under the first difference. Long strings are cut
+// to the text around the difference.
+
+///|
+/// Characters shown before the first difference in a cut string.
+let string_context = 20
+
+///|
+/// Strings longer than this are cut around the first difference.
+let string_window = 60
+
+///|
+/// The characters of a single-line string literal in `Debug` text, with each
+/// escape sequence as one unit. Return `None` for other text.
+fn string_units(text : String) -> Array[String]? {
+  let chars = text.to_array()
+  let last = chars.length() - 1
+  guard last >= 1 && chars[0] == '"' && chars[last] == '"' else { return None }
+  let units = []
+  let mut i = 1
+  while i < last {
+    let unit = StringBuilder()
+    if chars[i] == '\\' && i + 1 < last {
+      if chars[i + 1] == 'n' {
+        return None
+      }
+      unit.write_char(chars[i])
+      unit.write_char(chars[i + 1])
+      i += 2
+      if chars[i - 1] == 'u' && i < last && chars[i] == '{' {
+        while i < last && chars[i] != '}' {
+          unit.write_char(chars[i])
+          i += 1
+        }
+        if i < last {
+          unit.write_char(chars[i])
+          i += 1
+        }
+      }
+    } else if chars[i] == '"' {
+      // An unescaped quote ends the literal early: this is not one string.
+      return None
+    } else {
+      unit.write_char(chars[i])
+      i += 1
+    }
+    units.push(unit.to_string())
+  }
+  Some(units)
+}
+
+///|
+/// Two single-line strings as `to_equal` shows them, cut around the first
+/// difference when they are long.
+priv struct StringMismatch {
+  expected : String
+  actual : String
+  /// The column of the first difference in the shown text.
+  column : Int
+  /// The index of the first difference, in characters.
+  index : Int
+}
+
+///|
+/// Compare two single-line string literals in `Debug` text. Return `None`
+/// when the text is not two such literals, or when they are the same.
+fn string_mismatch(expected : String, actual : String) -> StringMismatch? {
+  guard string_units(expected) is Some(expected_units) &&
+    string_units(actual) is Some(actual_units) else {
+    return None
+  }
+  let longest = if expected_units.length() > actual_units.length() {
+    expected_units.length()
+  } else {
+    actual_units.length()
+  }
+  guard (0)
+    .until(longest + 1)
+    .find_first(i => expected_units.get(i) != actual_units.get(i))
+    is Some(index) else {
+    return None
+  }
+  if longest <= string_window {
+    // A caret under the first character does not help.
+    if index == 0 {
+      return None
+    }
+    let column = 1 +
+      expected_units[:index].fold(init=0, (sum, unit) => sum + unit.length())
+    return Some({ expected, actual, column, index, })
+  }
+  let start = if index > string_context { index - string_context } else { 0 }
+  let cut = (units : Array[String]) => {
+    let end = if start + string_window < units.length() {
+      start + string_window
+    } else {
+      units.length()
+    }
+    let before = if start > 0 { "..." } else { "" }
+    let after = if end < units.length() { "..." } else { "" }
+    let body = if start < end { units[start:end].iter().join("") } else { "" }
+    "\{before}\"\{body}\"\{after}"
+  }
+  let prefix = if start > 0 { 4 } else { 1 }
+  let column = prefix +
+    expected_units[start:index].fold(init=0, (sum, unit) => sum + unit.length())
+  Some({
+    expected: cut(expected_units),
+    actual: cut(actual_units),
+    column,
+    index,
+  })
+}

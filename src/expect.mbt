@@ -186,7 +186,7 @@ let diff_name = "Diff (- expected, + received)"
 fn render_details(details : Array[(String, String)]) -> String {
   let width = details.fold(init=0, (width, detail) => {
     let length = detail.0.length()
-    if detail.0 != diff_name && length > width {
+    if detail.0 != diff_name && detail.0 != "" && length > width {
       length
     } else {
       width
@@ -197,6 +197,13 @@ fn render_details(details : Array[(String, String)]) -> String {
     let (name, value) = detail
     if i > 0 {
       builder.write_string("\n")
+    }
+    // A detail with no name continues the value above it, such as a caret
+    // under the `Received` value.
+    if name.is_empty() {
+      builder.write_string(" ".repeat(width + 2))
+      builder.write_string(value)
+      continue
     }
     let lines = value.split("\n").map(line => line.to_owned()).collect()
     // Diff hunks already leave out unchanged lines.
@@ -253,19 +260,32 @@ pub fn[T : Eq + @debug.Debug] Expectation::to_equal(
   expected : T,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
+  let mismatch = () => string_mismatch(show(expected), show(self.actual))
   self.assert_that(
     self.actual == expected,
     "to_equal",
     args="expected",
-    expected=() => show(expected),
-    received=() => show(self.actual),
+    expected=() => {
+      match mismatch() {
+        Some(m) => m.expected
+        None => show(expected)
+      }
+    },
+    received=() => {
+      match mismatch() {
+        Some(m) => m.actual
+        None => show(self.actual)
+      }
+    },
     details=() => {
       if self.negated {
         return []
       }
       let expected_text = show(expected)
       let actual_text = show(self.actual)
-      if map_diff(expected_text, actual_text) is Some(details) {
+      if string_mismatch(expected_text, actual_text) is Some(m) {
+        [("", " ".repeat(m.column) + "^ first difference at index \{m.index}")]
+      } else if map_diff(expected_text, actual_text) is Some(details) {
         details
       } else if line_diff(expected_text, actual_text) is Some(diff) {
         [(diff_name, diff)]
