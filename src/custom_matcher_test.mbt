@@ -16,20 +16,6 @@ fn @expect.Expectation::to_be_even(
 }
 
 ///|
-/// The failure message of `f`, without the `<loc> FAILED: ` prefix.
-fn failure_message(f : () -> Unit raise Error) -> String raise Error {
-  f() catch {
-    Failure(message) =>
-      match message.find(" FAILED: ") {
-        Some(index) => return message.view(start_offset=index + 9).to_owned()
-        None => return message
-      }
-    error => fail("expected a Failure, got \{error}")
-  }
-  fail("expected a failure")
-}
-
-///|
 test "custom matcher passes" {
   @expect.expect(4).to_be_even()
   @expect.expect(3).not().to_be_even()
@@ -38,7 +24,7 @@ test "custom matcher passes" {
 ///|
 test "custom matcher uses the standard failure format" {
   inspect(
-    failure_message(() => @expect.expect(3).to_be_even()),
+    @expect.failure_message(() => @expect.expect(3).to_be_even()),
     content=(
       #|expect(received).to_be_even()
       #|Expected: an even number
@@ -50,7 +36,9 @@ test "custom matcher uses the standard failure format" {
 ///|
 test "custom matcher supports not() and labels" {
   inspect(
-    failure_message(() => @expect.expect(4, label="count").not().to_be_even()),
+    @expect.failure_message(() => {
+      @expect.expect(4, label="count").not().to_be_even()
+    }),
     content=(
       #|count: expect(received).not.to_be_even()
       #|Expected: not an even number
@@ -81,7 +69,7 @@ fn @expect.Expectation::to_have_total(
 ///|
 test "custom matcher adds detail lines" {
   inspect(
-    failure_message(() => @expect.expect([1, 2]).to_have_total(4)),
+    @expect.failure_message(() => @expect.expect([1, 2]).to_have_total(4)),
     content=(
       #|expect(received).to_have_total(total)
       #|Expected: a total of 4
@@ -131,7 +119,7 @@ test "matcher values from another package" {
   @expect.expect(3).to(@expect.is_not(even()))
   @expect.expect(6).to(@expect.all_of([even(), @expect.equal_to(6)]))
   inspect(
-    failure_message(() => {
+    @expect.failure_message(() => {
       @expect.expect(3).to(@expect.any_of([even(), @expect.equal_to(4)]))
     }),
     content=(
@@ -147,7 +135,7 @@ test "matcher values from another package" {
 
 ///|
 test "custom matchers collect failures in a scope" {
-  let message = failure_message(() => {
+  let message = @expect.failure_message(() => {
     @expect.expect_all(s => {
       s.expect(3).to_be_even()
       s.expect(5).to_be_even()

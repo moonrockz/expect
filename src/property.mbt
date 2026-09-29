@@ -78,5 +78,9 @@ pub fn[A : @quickcheck.Arbitrary + @quickcheck.Shrink + @debug.Debug] for_all(
       .replace(old="QuickCheck property", new="for_all(property)")
     [] => "for_all(property) failed"
   }
-  fail("\{headline}\n\{render_details(details)}", loc~)
+  let color = color_enabled()
+  fail(
+    "\{paint(headline, Bold, color)}\n\{render_details(details, color~)}",
+    loc~,
+  )
 }

@@ -2,6 +2,7 @@ import {
   "moonbitlang/core/debug",
   "moonbitlang/core/deque",
   "moonbitlang/core/diff",
+  "moonbitlang/core/env",
   "moonbitlang/core/hashmap",
   "moonbitlang/core/hashset",
   "moonbitlang/core/immut/hashmap" @immut_hashmap,

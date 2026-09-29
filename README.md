@@ -500,6 +500,26 @@ pay to format values. Put `#callsite(autofill(loc))` on your matcher and pass
 `loc~` to `assert_that`, so that the failure points at the line that calls
 your matcher.
 
+To test the failure messages of your matchers, use `failure_message` or
+`expect_failure`. Both run a block that must fail, and give its message
+without the source location, so the result does not change when the file
+changes:
+
+```moonbit
+test "to_be_even message" {
+  inspect(
+    @expect.failure_message(() => @expect.expect(3).to_be_even()),
+    content=(
+      #|expect(received).to_be_even()
+      #|Expected: an even number
+      #|Received: 3
+    ),
+  )
+  @expect.expect_failure(() => @expect.expect(3).to_be_even())
+  .to_contain("Expected: an even number")
+}
+```
+
 MoonBit lets a package add methods to a type from another package only when
 the methods are private. So a custom matcher method is available only in the
 package that defines it.

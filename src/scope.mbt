@@ -127,7 +127,11 @@ pub fn expect_all(
   }
   let builder = StringBuilder()
   builder.write_string(
-    "\{failures.length()} of \{scope.state.assertions} assertions failed",
+    paint(
+      "\{failures.length()} of \{scope.state.assertions} assertions failed",
+      Bold,
+      color_enabled(),
+    ),
   )
   for i, failure in failures {
     let (at, message) = failure
