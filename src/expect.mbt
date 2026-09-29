@@ -8,14 +8,25 @@ pub struct Expectation[T] {
   reason : String
   /// The soft-assertion scope that collects failures, if any.
   scope : Scope?
+  /// The source text of the value, shown in the headline instead of
+  /// `received`. It is built only when a failure message is built.
+  source : (() -> String)?
 }
 
 ///|
 /// Create an expectation on a value.
 ///
 /// When `label` is not empty, failure messages start with `"<label>: "`.
-pub fn[T] expect(actual : T, label? : String = "") -> Expectation[T] {
-  { actual, negated: false, label, reason: "", scope: None, }
+///
+/// `source` returns the text to show in the headline instead of `received`,
+/// such as `user.age`. The `moonrockz/expect/with_source` package fills it
+/// in from the source file. It is called only when an assertion fails.
+pub fn[T] expect(
+  actual : T,
+  label? : String = "",
+  source? : () -> String,
+) -> Expectation[T] {
+  { actual, negated: false, label, reason: "", scope: None, source, }
 }
 
 ///|
@@ -27,8 +38,9 @@ pub fn[T] expect(actual : T, label? : String = "") -> Expectation[T] {
 pub fn[T] expect_call(
   f : () -> T raise Error,
   label? : String = "",
+  source? : () -> String,
 ) -> Expectation[() -> T raise Error] {
-  { actual: f, negated: false, label, reason: "", scope: None, }
+  { actual: f, negated: false, label, reason: "", scope: None, source, }
 }
 
 ///|
@@ -54,6 +66,7 @@ fn[T, U] Expectation::with_value(
     label: self.label,
     reason: self.reason,
     scope: self.scope,
+    source: None,
   }
 }
 
@@ -161,7 +174,15 @@ fn[T] Expectation::failure_message(
 ) -> String {
   let label = if self.label.is_empty() { "" } else { "\{self.label}: " }
   let not_ = if self.negated { ".not" } else { "" }
-  let headline = "\{label}expect(received)\{not_}.\{matcher}(\{args})"
+  let subject = match self.source {
+    Some(source) =>
+      match source() {
+        "" => "received"
+        text => text
+      }
+    None => "received"
+  }
+  let headline = "\{label}expect(\{subject})\{not_}.\{matcher}(\{args})"
   let details = if self.reason.is_empty() {
     details
   } else {

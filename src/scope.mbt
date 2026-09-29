@@ -41,7 +41,14 @@ pub fn[T] Scope::expect(
   actual : T,
   label? : String = "",
 ) -> Expectation[T] {
-  { actual, negated: false, label, reason: "", scope: Some(self), }
+  {
+    actual,
+    negated: false,
+    label,
+    reason: "",
+    scope: Some(self),
+    source: None,
+  }
 }
 
 ///|
@@ -51,7 +58,14 @@ pub fn[T] Scope::expect_call(
   f : () -> T raise Error,
   label? : String = "",
 ) -> Expectation[() -> T raise Error] {
-  { actual: f, negated: false, label, reason: "", scope: Some(self), }
+  {
+    actual: f,
+    negated: false,
+    label,
+    reason: "",
+    scope: Some(self),
+    source: None,
+  }
 }
 
 ///|
