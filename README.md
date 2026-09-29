@@ -348,17 +348,20 @@ Diff (- expected, + received):
      x: 1,
   -  y: 3,
   +  y: 2,
+  ?     ^
    }
 ```
 
 - The location is the matcher call, so a test with many assertions shows
   which one failed.
 - `to_equal` adds a git-style line diff when a value spans more than one line
-  once it is pretty-printed. That includes structs, arrays, maps and
+  once it is pretty-printed. That includes structs, arrays and
   multi-line strings. The values are pretty-printed with one field or element
   per line, so the diff shows exactly which fields changed. Unchanged lines
   far from a change are left out, and each group of changes gets its own
   `@@` hunk header. For long values, only the diff is shown.
+- When one line replaces another and most of it is the same, a `?` line
+  puts carets under the characters that changed.
 - When `to_equal` fails on two single-line strings, a caret points at the
   first difference. Long strings are cut to the text around it:
 
@@ -447,6 +450,7 @@ Diff (- expected, + received):
      password: ...,
   -  balance: $10.50,
   +  balance: $10.05,
+  ?               ^^
    }
 ```
 

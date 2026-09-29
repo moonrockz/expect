@@ -82,6 +82,7 @@ test "to_equal shows a structural diff" {
       #|     x: 1,
       #|  -  y: 3,
       #|  +  y: 2,
+      #|  ?     ^
       #|   }
     ),
   )
@@ -649,6 +650,7 @@ test "to_equal diff on long values" {
       #|     24,
       #|  -  25,
       #|  +  99,
+      #|  ?  ^^
       #|     26,
       #|     27,
       #|     28,
@@ -768,6 +770,7 @@ test "to_equal shows a git-style diff of nested values" {
       #|     address: {
       #|  -    city: "London",
       #|  +    city: "Paris",
+      #|  ?           ^^^^^
       #|       zip: "N1",
       #|     },
       #|   }
@@ -808,6 +811,7 @@ test "to_equal diff has one hunk per distant change" {
       #|     4,
       #|  -  5,
       #|  +  -1,
+      #|  ?  ^^
       #|     6,
       #|     7,
       #|     8,
@@ -817,6 +821,7 @@ test "to_equal diff has one hunk per distant change" {
       #|     29,
       #|  -  30,
       #|  +  -1,
+      #|  ?  ^^
       #|     31,
       #|     32,
       #|     33,
@@ -875,6 +880,7 @@ test "custom Debug impls shape failure messages" {
       #|     password: ...,
       #|  -  balance: $10.50,
       #|  +  balance: $10.05,
+      #|  ?               ^^
       #|   }
     ),
   )

@@ -103,6 +103,7 @@ test "records keep the line diff" {
       #|     x: 1,
       #|  -  y: 3,
       #|  +  y: 2,
+      #|  ?     ^
       #|   }
     ),
   )
