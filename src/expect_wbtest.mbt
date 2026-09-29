@@ -82,6 +82,7 @@ test "to_equal shows a structural diff" {
       #|     x: 1,
       #|  -  y: 3,
       #|  +  y: 2,
+      #|  ?     ^
       #|   }
     ),
   )
@@ -338,6 +339,10 @@ test "Option matchers" {
 test "Result matchers" {
   let ok : Result[Int, String] = Ok(1)
   let err : Result[Int, String] = Err("boom")
+  expect((Ok(1) : Result[Int, String])).to_be_ok()
+  expect((Err("boom") : Result[Int, String])).to_be_err()
+  expect((Ok(1) : Result[Int, String])).unwrap_ok().to_equal(1)
+  expect((Err("boom") : Result[Int, String])).unwrap_err().to_equal("boom")
   expect(ok).to_be_ok()
   expect(err).to_be_err()
   expect(ok).not().to_be_err()
@@ -541,6 +546,7 @@ test "array matchers" {
 
 ///|
 test "to_contain_key" {
+  expect({ "a": 1 }).to_contain_key("a")
   let m = { "a": 1 }
   expect(m).to_contain_key("a")
   expect(m).not().to_contain_key("b")
@@ -649,6 +655,7 @@ test "to_equal diff on long values" {
       #|     24,
       #|  -  25,
       #|  +  99,
+      #|  ?  ^^
       #|     26,
       #|     27,
       #|     28,
@@ -768,6 +775,7 @@ test "to_equal shows a git-style diff of nested values" {
       #|     address: {
       #|  -    city: "London",
       #|  +    city: "Paris",
+      #|  ?           ^^^^^
       #|       zip: "N1",
       #|     },
       #|   }
@@ -808,6 +816,7 @@ test "to_equal diff has one hunk per distant change" {
       #|     4,
       #|  -  5,
       #|  +  -1,
+      #|  ?  ^^
       #|     6,
       #|     7,
       #|     8,
@@ -817,6 +826,7 @@ test "to_equal diff has one hunk per distant change" {
       #|     29,
       #|  -  30,
       #|  +  -1,
+      #|  ?  ^^
       #|     31,
       #|     32,
       #|     33,
@@ -875,6 +885,7 @@ test "custom Debug impls shape failure messages" {
       #|     password: ...,
       #|  -  balance: $10.50,
       #|  +  balance: $10.05,
+      #|  ?               ^^
       #|   }
     ),
   )

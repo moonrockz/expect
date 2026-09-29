@@ -1,5 +1,6 @@
 ///|
 test "to_contain_value" {
+  expect({ "a": 1 }).to_contain_value(1)
   let m = { "a": 1, "b": 2 }
   expect(m).to_contain_value(2)
   expect(m).not().to_contain_value(3)
@@ -15,6 +16,7 @@ test "to_contain_value" {
 
 ///|
 test "to_contain_entry" {
+  expect({ "a": 1, "b": 2 }).to_contain_entry("a", 1)
   let m = { "a": 1, "b": 2 }
   expect(m).to_contain_entry("a", 1)
   expect(m).not().to_contain_entry("a", 2)
@@ -40,6 +42,7 @@ test "to_contain_entry" {
 
 ///|
 test "to_contain_entries" {
+  expect({ "a": 1, "b": 2 }).to_contain_entries({ "b": 2 })
   let m = { "a": 1, "b": 2, "c": 3 }
   expect(m).to_contain_entries({ "c": 3, "a": 1 })
   expect(m).not().to_contain_entries({ "a": 2 })
@@ -103,6 +106,7 @@ test "records keep the line diff" {
       #|     x: 1,
       #|  -  y: 3,
       #|  +  y: 2,
+      #|  ?     ^
       #|   }
     ),
   )

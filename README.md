@@ -18,6 +18,9 @@ import {
 
 ## Usage
 
+[docs/matchers.md](docs/matchers.md) lists every matcher, grouped by the type
+of the value under test, with an example of each.
+
 ```moonbit
 test "basic assertions" {
   // Equality
@@ -348,17 +351,20 @@ Diff (- expected, + received):
      x: 1,
   -  y: 3,
   +  y: 2,
+  ?     ^
    }
 ```
 
 - The location is the matcher call, so a test with many assertions shows
   which one failed.
 - `to_equal` adds a git-style line diff when a value spans more than one line
-  once it is pretty-printed. That includes structs, arrays, maps and
+  once it is pretty-printed. That includes structs, arrays and
   multi-line strings. The values are pretty-printed with one field or element
   per line, so the diff shows exactly which fields changed. Unchanged lines
   far from a change are left out, and each group of changes gets its own
   `@@` hunk header. For long values, only the diff is shown.
+- When one line replaces another and most of it is the same, a `?` line
+  puts carets under the characters that changed.
 - When `to_equal` fails on two single-line strings, a caret points at the
   first difference. Long strings are cut to the text around it:
 
@@ -447,6 +453,7 @@ Diff (- expected, + received):
      password: ...,
   -  balance: $10.50,
   +  balance: $10.05,
+  ?               ^^
    }
 ```
 
@@ -457,6 +464,12 @@ Formatting does not change comparison: matchers still use `Eq`. If two values
 differ only in a field that you hide, the assertion fails but the message
 shows no difference. Hide a field only when it cannot be the cause of a
 failure, or give it a short form, such as its length, instead of `...`.
+
+## Development
+
+Run the tests with `moon test`. After you add or change a public matcher,
+run `mise run docs:catalog` to update `docs/matchers.md`. CI fails when the
+catalog is out of date.
 
 ## License
 

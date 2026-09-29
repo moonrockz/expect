@@ -24,6 +24,9 @@ jobs:
       - name: Check code
         run: moon check --deny-warn
 
+      - name: Check matcher catalog
+        run: python3 mise-tasks/docs/catalog --check
+
   unit-tests:
     runs-on: ubuntu-latest
     steps:

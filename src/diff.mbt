@@ -239,7 +239,59 @@ fn line_diff(expected : String, actual : String) -> String? {
   for hunk in @diff.Diff(old=old[:], new=new[:]).group() {
     builder.write_string(hunk.render(show=line => line))
   }
-  Some(builder.to_string().trim_end(chars="\n").to_owned())
+  let lines = builder
+    .to_string()
+    .trim_end(chars="\n")
+    .split("\n")
+    .map(line => line.to_owned())
+    .collect()
+  Some(mark_changes(lines).join("\n"))
+}
+
+///|
+/// After each line that replaces exactly one other line, add a `?` line
+/// with carets under the characters that changed, as Python's `difflib`
+/// does. Skip the marks when most of the line changed, because then they do
+/// not help.
+fn mark_changes(lines : Array[String]) -> Array[String] {
+  let result = []
+  for i, line in lines {
+    result.push(line)
+    let replaces_one = i >= 1 &&
+      line.has_prefix("+") &&
+      lines[i - 1].has_prefix("-") &&
+      (i < 2 || !lines[i - 2].has_prefix("-")) &&
+      (i + 1 >= lines.length() || !lines[i + 1].has_prefix("+"))
+    if !replaces_one {
+      continue
+    }
+    let old = lines[i - 1].to_array()[1:]
+    let new = line.to_array()[1:]
+    let shortest = if old.length() < new.length() {
+      old.length()
+    } else {
+      new.length()
+    }
+    let mut prefix = 0
+    while prefix < shortest && old[prefix] == new[prefix] {
+      prefix += 1
+    }
+    let mut suffix = 0
+    while suffix < shortest - prefix &&
+          old[old.length() - 1 - suffix] == new[new.length() - 1 - suffix] {
+      suffix += 1
+    }
+    let changed = new.length() - prefix - suffix
+    let longest = if old.length() > new.length() {
+      old.length()
+    } else {
+      new.length()
+    }
+    if changed > 0 && (prefix + suffix) * 2 >= longest {
+      result.push("?" + " ".repeat(prefix) + "^".repeat(changed))
+    }
+  }
+  result
 }
 
 // Map differences

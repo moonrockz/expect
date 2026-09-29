@@ -14,6 +14,7 @@ test "to_be_one_of" {
 
 ///|
 test "to_be_in" {
+  expect(2).to_be_in(Set([1, 2, 3]))
   let allowed = Set([1, 2, 3])
   expect(2).to_be_in(allowed)
   expect(5).not().to_be_in(allowed)

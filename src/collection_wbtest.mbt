@@ -182,6 +182,7 @@ test "to_contain_none_of" {
 
 ///|
 test "to_satisfy_respectively" {
+  expect([1]).to_satisfy_respectively([it => it.to_equal(1)])
   expect([1, "a".length()]).to_satisfy_respectively([
     it => it.to_equal(1),
     it => it.to_be_greater_than(0),
