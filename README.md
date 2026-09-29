@@ -230,6 +230,38 @@ pub fn even() -> @expect.Matcher[Int] {
 Unlike custom matcher methods, these functions can be public, so a package
 can share them.
 
+### Show the expression
+
+`moonrockz/expect/with_source` has its own `expect` and `expect_call`. A
+failure shows the expression you wrote instead of `received`:
+
+```moonbit
+import {
+  "moonrockz/expect",
+  "moonrockz/expect/with_source",
+} for "test"
+```
+
+```moonbit
+@with_source.expect(user.age + 1).to_equal(20)
+```
+
+```text
+expect(user.age + 1).to_equal(expected)
+Expected: 20
+Received: 18
+```
+
+MoonBit has no macros, so the package reads the text from your source file
+when an assertion fails. The compiler gives the location of the argument.
+It depends on `moonbitlang/x/fs`, so it is a separate, opt-in package.
+
+- The file is read only when an assertion fails, and only once per file.
+- If the file cannot be read, for example because the tests run from a
+  different directory, the headline shows `received` as before.
+- Navigation shows the path from there on, as with `@expect.expect`.
+- Soft scopes (`s.expect`) still show `received`.
+
 ### Snapshots
 
 This library has no snapshot matcher, because MoonBit's own snapshot tests

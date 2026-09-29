@@ -28,6 +28,7 @@ fn[T, U] Expectation::navigate(
     label,
     reason: self.reason,
     scope: self.scope,
+    source: None,
   }
 }
 
