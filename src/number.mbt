@@ -8,7 +8,7 @@ pub(open) trait Number: Compare {
 }
 
 ///|
-pub impl Number for Int with fn zero() {
+pub impl Number for Int32 with fn zero() {
   0
 }
 
@@ -23,7 +23,7 @@ pub impl Number for Int64 with fn zero() {
 }
 
 ///|
-pub impl Number for UInt with fn zero() {
+pub impl Number for UInt32 with fn zero() {
   0
 }
 
@@ -104,8 +104,8 @@ pub fn[T : Compare + @debug.Debug] Expectation::to_be_between(
   self : Expectation[T],
   low : T,
   high : T,
-  low_inclusive? : Bool = true,
-  high_inclusive? : Bool = true,
+  low_inclusive~ : Bool = true,
+  high_inclusive~ : Bool = true,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let above_low = if low_inclusive {
@@ -261,7 +261,7 @@ pub fn[F : FloatingPoint] Expectation::to_be_close_to(
   expected : F,
   tolerance? : Double,
   relative? : Double,
-  ulps? : Int,
+  ulps? : Int32,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let given = [

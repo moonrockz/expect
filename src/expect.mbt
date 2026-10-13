@@ -23,7 +23,7 @@ pub struct Expectation[T] {
 /// in from the source file. It is called only when an assertion fails.
 pub fn[T] expect(
   actual : T,
-  label? : String = "",
+  label~ : String = "",
   source? : () -> String,
 ) -> Expectation[T] {
   { actual, negated: false, label, reason: "", scope: None, source, }
@@ -37,7 +37,7 @@ pub fn[T] expect(
 /// `expect_call(() => parse("bad")).to_raise()`.
 pub fn[T] expect_call(
   f : () -> T raise Error,
-  label? : String = "",
+  label~ : String = "",
   source? : () -> String,
 ) -> Expectation[() -> T raise Error] {
   { actual: f, negated: false, label, reason: "", scope: None, source, }
@@ -137,7 +137,7 @@ pub fn[T] Expectation::assert_that(
   matcher : String,
   expected~ : () -> String,
   received~ : () -> String,
-  args? : String = "",
+  args~ : String = "",
   details? : () -> Array[(String, String)],
   loc~ : SourceLoc,
 ) -> Unit raise Error {
@@ -281,7 +281,7 @@ let diff_name = "Diff (- expected, + received)"
 ///|
 fn render_details(
   details : Array[(String, String)],
-  color? : Bool = false,
+  color~ : Bool = false,
 ) -> String {
   let width = details.fold(init=0, (width, detail) => {
     let length = detail.0.length()
@@ -448,7 +448,7 @@ pub fn[T : Eq + @debug.Debug] Expectation::to_not_equal(
 pub fn[T : @debug.Debug] Expectation::to_satisfy(
   self : Expectation[T],
   predicate : (T) -> Bool,
-  description? : String = "predicate",
+  description~ : String = "predicate",
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   self.assert_that(
@@ -921,7 +921,7 @@ fn[T : Eq] unmatched_elements(
 pub fn[T : @debug.Debug] Expectation::to_all_satisfy(
   self : Expectation[Array[T]],
   predicate : (T) -> Bool,
-  description? : String = "predicate",
+  description~ : String = "predicate",
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let failed = indices_where(self.actual, e => !predicate(e))
@@ -965,7 +965,7 @@ pub fn[K : Hash + Eq + @debug.Debug, V : @debug.Debug] Expectation::to_contain_k
 /// Implement this trait to use `to_be_empty` and `to_have_length` on your own
 /// types.
 pub(open) trait HasLength {
-  fn length(Self) -> Int
+  fn length(Self) -> Int32
 }
 
 ///|
@@ -1021,7 +1021,7 @@ pub fn[C : HasLength + @debug.Debug] Expectation::to_be_empty(
 #callsite(autofill(loc))
 pub fn[C : HasLength + @debug.Debug] Expectation::to_have_length(
   self : Expectation[C],
-  expected : Int,
+  expected : Int32,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let actual_len = HasLength::length(self.actual)
@@ -1053,7 +1053,7 @@ pub fn Expectation::to_be_empty_string(
 #callsite(autofill(loc))
 pub fn Expectation::to_have_length_string(
   self : Expectation[String],
-  expected : Int,
+  expected : Int32,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   self.to_have_length(expected, loc~)

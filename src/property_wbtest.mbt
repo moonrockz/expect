@@ -1,7 +1,7 @@
 ///|
 test "for_all passes when the property holds" {
-  for_all((x : Int) => expect(x * 2 % 2).to_equal(0))
-  for_all((xs : Array[Int]) => {
+  for_all((x : Int32) => expect(x * 2 % 2).to_equal(0))
+  for_all((xs : Array[Int32]) => {
     expect(xs.length()).to_be_greater_than_or_equal(0)
   })
 }
@@ -9,7 +9,7 @@ test "for_all passes when the property holds" {
 ///|
 test "for_all shows the smallest counterexample and the matcher failure" {
   let message = failure(() => {
-    for_all((x : Int) => expect(x).to_be_less_than(50), seed=42)
+    for_all((x : Int32) => expect(x).to_be_less_than(50), seed=42)
   })
   let lines = message.split("\n").map(line => line.to_owned()).collect()
   inspect(

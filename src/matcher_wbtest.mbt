@@ -1,7 +1,7 @@
 ///|
 priv struct Member {
   name : String
-  age : Int
+  age : Int32
   city : String
 } derive(Debug)
 
@@ -179,7 +179,7 @@ test "to_contain_element_matching" {
 
 ///|
 test "users can build their own matchers" {
-  let even : Matcher[Int] = {
+  let even : Matcher[Int32] = {
     describe: () => "even",
     check: x => if x % 2 == 0 { None } else { Some("was odd") },
   }

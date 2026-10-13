@@ -4,7 +4,7 @@
 /// One step of a path into a Json value.
 priv enum PathStep {
   Key(String)
-  Index(Int)
+  Index(Int32)
 }
 
 ///|
@@ -74,7 +74,7 @@ fn parse_path(path : String) -> Array[PathStep]? {
 
 ///|
 /// The path of the first `count` steps, such as `items[0]`.
-fn path_text(steps : Array[PathStep], count : Int) -> String {
+fn path_text(steps : Array[PathStep], count : Int32) -> String {
   let builder = StringBuilder()
   for i, step in steps[:count] {
     match step {

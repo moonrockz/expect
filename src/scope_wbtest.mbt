@@ -113,7 +113,7 @@ test "failed navigation stops the block" {
     scoped_failure(() => {
       expect_all(s => {
         s.expect(1).to_equal(2)
-        s.expect((None : Int?)).unwrap_some().to_equal(1)
+        s.expect((None : Int32?)).unwrap_some().to_equal(1)
         s.expect(3).to_equal(4)
       })
     }),
@@ -166,7 +166,7 @@ test "nested scopes report to the outer scope" {
       expect_all(s => {
         s.expect_all(inner => {
           inner.expect(1).to_equal(2)
-          inner.expect((None : Int?)).unwrap_some().to_equal(1)
+          inner.expect((None : Int32?)).unwrap_some().to_equal(1)
           inner.expect(9).to_equal(9)
         })
         s.expect(3).to_equal(4)

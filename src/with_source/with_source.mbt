@@ -36,7 +36,7 @@ fn file_lines(path : String) -> Array[String]? {
 ///|
 /// Parse `path:line:column-line:column@package`. Columns start at 1, and the
 /// end column is exclusive.
-fn parse_location(text : String) -> (String, Int, Int, Int, Int)? {
+fn parse_location(text : String) -> (String, Int32, Int32, Int32, Int32)? {
   let without_package = match text.rev_find("@") {
     Some(index) => text.view(end_offset=index).to_owned()
     None => text
@@ -100,7 +100,7 @@ fn first_argument(args_loc : ArgsLoc) -> () -> String {
 #callsite(autofill(args_loc))
 pub fn[T] expect(
   actual : T,
-  label? : String = "",
+  label~ : String = "",
   args_loc~ : ArgsLoc,
 ) -> @expect.Expectation[T] {
   @expect.expect(actual, label~, source=first_argument(args_loc))
@@ -112,7 +112,7 @@ pub fn[T] expect(
 #callsite(autofill(args_loc))
 pub fn[T] expect_call(
   f : () -> T raise Error,
-  label? : String = "",
+  label~ : String = "",
   args_loc~ : ArgsLoc,
 ) -> @expect.Expectation[() -> T raise Error] {
   @expect.expect_call(f, label~, source=first_argument(args_loc))

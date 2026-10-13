@@ -1,7 +1,7 @@
 ///|
 priv struct User {
   name : String
-  age : Int
+  age : Int32
 }
 
 ///|

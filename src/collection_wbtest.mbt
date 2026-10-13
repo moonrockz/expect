@@ -214,7 +214,7 @@ test "to_satisfy_respectively" {
 ///|
 test "to_be_sorted and to_be_sorted_by" {
   expect([1, 2, 2, 3]).to_be_sorted()
-  expect(([] : Array[Int])).to_be_sorted()
+  expect(([] : Array[Int32])).to_be_sorted()
   expect(["ccc", "a", "bb"]).not().to_be_sorted_by(s => s.length())
   expect(["a", "bb", "ccc"]).to_be_sorted_by(s => s.length())
   inspect(

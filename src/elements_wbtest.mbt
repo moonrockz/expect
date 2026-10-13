@@ -26,11 +26,11 @@ test "HasLength works for core collections" {
   expect(@deque.Deque([1])).to_have_length(1)
   expect(@hashmap.HashMap([("a", 1)])).to_have_length(1)
   expect(@hashset.HashSet([1])).to_have_length(1)
-  expect((@sorted_map.SortedMap([]) : @sorted_map.SortedMap[Int, Int])).to_be_empty()
-  expect((@sorted_set.SortedSet([]) : @sorted_set.SortedSet[Int])).to_be_empty()
-  expect((@queue.Queue([]) : @queue.Queue[Int])).to_be_empty()
+  expect((@sorted_map.SortedMap([]) : @sorted_map.SortedMap[Int32, Int32])).to_be_empty()
+  expect((@sorted_set.SortedSet([]) : @sorted_set.SortedSet[Int32])).to_be_empty()
+  expect((@queue.Queue([]) : @queue.Queue[Int32])).to_be_empty()
   expect(
-    (@priority_queue.PriorityQueue([]) : @priority_queue.PriorityQueue[Int]),
+    (@priority_queue.PriorityQueue([]) : @priority_queue.PriorityQueue[Int32]),
   ).to_be_empty()
   expect(@list.List([1, 2])).to_have_length(2)
   expect(@immut_hashmap.HashMap([("a", 1)])).to_have_length(1)
@@ -38,12 +38,12 @@ test "HasLength works for core collections" {
   expect(
     (
       @immut_priority_queue.PriorityQueue([]) :
-      @immut_priority_queue.PriorityQueue[Int]),
+      @immut_priority_queue.PriorityQueue[Int32]),
   ).to_be_empty()
   expect(@immut_sorted_map.SortedMap([(1, "a")])).to_have_length(1)
   expect(@immut_sorted_set.SortedSet([1, 2, 3])).to_have_length(3)
-  expect((@vector.Vector([]) : @vector.Vector[Int])).to_be_empty()
-  expect((@vector_map.VectorMap([]) : @vector_map.VectorMap[Int, Int])).to_be_empty()
+  expect((@vector.Vector([]) : @vector.Vector[Int32])).to_be_empty()
+  expect((@vector_map.VectorMap([]) : @vector_map.VectorMap[Int32, Int32])).to_be_empty()
   inspect(
     failure(() => expect(@list.List([1, 2])).to_be_empty()),
     content=(

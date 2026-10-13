@@ -63,8 +63,8 @@ test "to_equal" {
 
 ///|
 priv struct Point {
-  x : Int
-  y : Int
+  x : Int32
+  y : Int32
 } derive(Eq, Debug)
 
 ///|
@@ -292,10 +292,10 @@ test "to_be_close_to" {
 ///|
 test "Option matchers" {
   expect(Some(42)).to_be_some()
-  expect((None : Int?)).to_be_none()
+  expect((None : Int32?)).to_be_none()
   expect(Some(42)).unwrap_some().to_equal(42)
   inspect(
-    failure(() => expect((None : Int?)).to_be_some()),
+    failure(() => expect((None : Int32?)).to_be_some()),
     content=(
       #|expect(received).to_be_some()
       #|Expected: Some(_)
@@ -319,7 +319,7 @@ test "Option matchers" {
     ),
   )
   inspect(
-    failure(() => expect((None : Int?)).unwrap_some().to_equal(1)),
+    failure(() => expect((None : Int32?)).unwrap_some().to_equal(1)),
     content=(
       #|expect(received).unwrap_some()
       #|Expected: Some(_)
@@ -337,12 +337,12 @@ test "Option matchers" {
 
 ///|
 test "Result matchers" {
-  let ok : Result[Int, String] = Ok(1)
-  let err : Result[Int, String] = Err("boom")
-  expect((Ok(1) : Result[Int, String])).to_be_ok()
-  expect((Err("boom") : Result[Int, String])).to_be_err()
-  expect((Ok(1) : Result[Int, String])).unwrap_ok().to_equal(1)
-  expect((Err("boom") : Result[Int, String])).unwrap_err().to_equal("boom")
+  let ok : Result[Int32, String] = Ok(1)
+  let err : Result[Int32, String] = Err("boom")
+  expect((Ok(1) : Result[Int32, String])).to_be_ok()
+  expect((Err("boom") : Result[Int32, String])).to_be_err()
+  expect((Ok(1) : Result[Int32, String])).unwrap_ok().to_equal(1)
+  expect((Err("boom") : Result[Int32, String])).unwrap_err().to_equal("boom")
   expect(ok).to_be_ok()
   expect(err).to_be_err()
   expect(ok).not().to_be_err()
@@ -499,7 +499,7 @@ test "array matchers" {
   expect([1, 1, 2]).not().to_equal_ignoring_order([1, 2, 2])
   expect([1, 2]).not().to_equal_ignoring_order([1, 2, 3])
   expect([2, 4, 6]).to_all_satisfy(x => x % 2 == 0)
-  expect(([] : Array[Int])).to_all_satisfy(_ => false)
+  expect(([] : Array[Int32])).to_all_satisfy(_ => false)
   expect([2, 3]).not().to_all_satisfy(x => x % 2 == 0)
   inspect(
     failure(() => expect([1, 2, 3]).to_contain_element(5)),
@@ -562,7 +562,7 @@ test "to_contain_key" {
 
 ///|
 test "length matchers" {
-  expect(([] : Array[Int])).to_be_empty()
+  expect(([] : Array[Int32])).to_be_empty()
   expect("").to_be_empty()
   expect([1, 2, 3]).to_have_length(3)
   expect("hello").to_have_length(5)
@@ -611,13 +611,13 @@ test "HasLength works for other core collections" {
   expect(b"abc").to_have_length(3)
   expect({ "a": 1, "b": 2 }).to_have_length(2)
   expect(Set::from_array([1, 2, 2])).to_have_length(2)
-  expect(Set::from_array(([] : Array[Int]))).to_be_empty()
-  expect(({} : Map[String, Int])).to_be_empty()
+  expect(Set::from_array(([] : Array[Int32]))).to_be_empty()
+  expect(({} : Map[String, Int32])).to_be_empty()
 }
 
 ///|
 priv struct Bag {
-  items : Array[Int]
+  items : Array[Int32]
 } derive(Debug)
 
 ///|
@@ -837,7 +837,7 @@ test "to_equal diff has one hunk per distant change" {
 ///|
 /// The README example of a manual `Debug` impl.
 priv struct Money {
-  cents : Int
+  cents : Int32
 } derive(Eq)
 
 ///|

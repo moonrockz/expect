@@ -11,7 +11,7 @@
 /// matchers and navigation methods then work.
 pub fn[T] expect_elements(
   items : Iter[T],
-  label? : String = "",
+  label~ : String = "",
 ) -> Expectation[Array[T]] {
   expect(items.collect(), label~)
 }

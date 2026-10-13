@@ -337,8 +337,8 @@ fn Equivalence::compare_unordered(
 pub fn[T : @debug.Debug] Expectation::to_be_equivalent_to(
   self : Expectation[T],
   expected : T,
-  excluding? : Array[String] = [],
-  ignoring_order? : Bool = false,
+  excluding~ : Array[String] = [],
+  ignoring_order~ : Bool = false,
   tolerance? : Double,
   loc~ : SourceLoc,
 ) -> Unit raise Error {

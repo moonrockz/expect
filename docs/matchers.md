@@ -65,17 +65,17 @@ is not a number.
 | Method | Description | Example |
 |---|---|---|
 | `to_be_some` | Assert the actual Option value is Some. | `@expect.expect(Some(42)).to_be_some()` |
-| `to_be_none` | Assert the actual Option value is None. | `@expect.expect((None : Int?)).to_be_none()` |
+| `to_be_none` | Assert the actual Option value is None. | `@expect.expect((None : Int32?)).to_be_none()` |
 | `unwrap_some` → `Expectation[T]` | Assert the actual Option value is Some, and return an expectation on the inner value. Cannot be used after `not()`. | `@expect.expect(Some(42)).unwrap_some().to_equal(42)` |
 
 ## Results
 
 | Method | Description | Example |
 |---|---|---|
-| `to_be_ok` | Assert the actual Result value is Ok. | `@expect.expect((Ok(1) : Result[Int, String])).to_be_ok()` |
-| `to_be_err` | Assert the actual Result value is Err. | `@expect.expect((Err("boom") : Result[Int, String])).to_be_err()` |
-| `unwrap_ok` → `Expectation[T]` | Assert the actual Result value is Ok, and return an expectation on the inner value. Cannot be used after `not()`. | `@expect.expect((Ok(1) : Result[Int, String])).unwrap_ok().to_equal(1)` |
-| `unwrap_err` → `Expectation[E]` | Assert the actual Result value is Err, and return an expectation on the error. Cannot be used after `not()`. | `@expect.expect((Err("boom") : Result[Int, String])).unwrap_err().to_equal("boom")` |
+| `to_be_ok` | Assert the actual Result value is Ok. | `@expect.expect((Ok(1) : Result[Int32, String])).to_be_ok()` |
+| `to_be_err` | Assert the actual Result value is Err. | `@expect.expect((Err("boom") : Result[Int32, String])).to_be_err()` |
+| `unwrap_ok` → `Expectation[T]` | Assert the actual Result value is Ok, and return an expectation on the inner value. Cannot be used after `not()`. | `@expect.expect((Ok(1) : Result[Int32, String])).unwrap_ok().to_equal(1)` |
+| `unwrap_err` → `Expectation[E]` | Assert the actual Result value is Err, and return an expectation on the error. Cannot be used after `not()`. | `@expect.expect((Err("boom") : Result[Int32, String])).unwrap_err().to_equal("boom")` |
 
 ## Strings
 
