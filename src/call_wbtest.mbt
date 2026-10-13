@@ -5,7 +5,7 @@ priv suberror ParseError {
 }
 
 ///|
-fn parse_number(text : String) -> Int raise ParseError {
+fn parse_number(text : String) -> Int32 raise ParseError {
   if text.is_empty() {
     raise Empty
   }

@@ -80,7 +80,7 @@ pub fn Expectation::message(self : Expectation[Error]) -> Expectation[String] {
 pub fn[T] Expectation::to_raise_matching(
   self : Expectation[() -> T raise Error],
   predicate : (Error) -> Bool,
-  description? : String = "predicate",
+  description~ : String = "predicate",
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let raised = self.call()

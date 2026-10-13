@@ -5,11 +5,11 @@
 
 ///|
 /// The value of a hex digit.
-fn hex_digit(c : Char) -> Int? {
+fn hex_digit(c : Char) -> Int32? {
   match c {
-    '0'..='9' => Some(c.to_int() - '0'.to_int())
-    'a'..='f' => Some(c.to_int() - 'a'.to_int() + 10)
-    'A'..='F' => Some(c.to_int() - 'A'.to_int() + 10)
+    '0'..<='9' => Some(c.to_int() - '0'.to_int())
+    'a'..<='f' => Some(c.to_int() - 'a'.to_int() + 10)
+    'A'..<='F' => Some(c.to_int() - 'A'.to_int() + 10)
     _ => None
   }
 }
@@ -17,7 +17,7 @@ fn hex_digit(c : Char) -> Int? {
 ///|
 /// The bytes in `Debug` text of `Bytes` or `BytesView`. Return `None` for
 /// other text.
-fn bytes_values(text : String) -> Array[Int]? {
+fn bytes_values(text : String) -> Array[Int32]? {
   // Long values break over several lines.
   let text = if text.contains("\n") {
     String::from_iter(text.iter().filter(c => c != '\n' && c != ' ')).replace_all(
@@ -60,14 +60,14 @@ fn bytes_values(text : String) -> Array[Int]? {
 
 ///|
 /// A byte as two lower-case hex digits.
-fn hex_byte(value : Int) -> String {
+fn hex_byte(value : Int32) -> String {
   let digits = "0123456789abcdef"
   "\{digits[value / 16:value / 16 + 1]}\{digits[value % 16:value % 16 + 1]}"
 }
 
 ///|
 /// An offset as at least two lower-case hex digits.
-fn hex_offset(offset : Int) -> String {
+fn hex_offset(offset : Int32) -> String {
   let text = offset.to_string(radix=16)
   if text.length() < 2 {
     "0" + text
@@ -78,7 +78,7 @@ fn hex_offset(offset : Int) -> String {
 
 ///|
 /// A hex dump of `bytes`, 16 bytes per line, with offsets and ASCII text.
-fn hex_dump(bytes : Array[Int]) -> String {
+fn hex_dump(bytes : Array[Int32]) -> String {
   let lines = []
   for start = 0; start < bytes.length(); start = start + 16 {
     let line = StringBuilder()
@@ -92,7 +92,7 @@ fn hex_dump(bytes : Array[Int]) -> String {
           line.write_string(hex_byte(value) + " ")
           text.write_char(
             if value >= 0x20 && value < 0x7f {
-              Int::unsafe_to_char(value)
+              Int32::unsafe_to_char(value)
             } else {
               '.'
             },
@@ -128,7 +128,7 @@ fn bytes_mismatch(expected : String, actual : String) -> String? {
     let want = expected_bytes.get(i)
     let got = actual_bytes.get(i)
     if want != got {
-      let describe = (value : Int?) => {
+      let describe = (value : Int32?) => {
         match value {
           Some(v) => "0x\{hex_byte(v)}"
           None => "nothing"

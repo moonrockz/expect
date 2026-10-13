@@ -88,7 +88,7 @@ test "first and last" {
     ),
   )
   inspect(
-    failure(() => expect(([] : Array[Int])).first().to_equal(0)),
+    failure(() => expect(([] : Array[Int32])).first().to_equal(0)),
     content=(
       #|expect(received).first()
       #|Expected: a first element
@@ -96,7 +96,7 @@ test "first and last" {
     ),
   )
   inspect(
-    failure(() => expect(([] : Array[Int])).last().to_equal(0)),
+    failure(() => expect(([] : Array[Int32])).last().to_equal(0)),
     content=(
       #|expect(received).last()
       #|Expected: a last element

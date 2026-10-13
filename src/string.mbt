@@ -67,7 +67,7 @@ pub fn Expectation::to_be_blank(
 pub fn Expectation::to_contain_times(
   self : Expectation[String],
   text : String,
-  count : Int,
+  count : Int32,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   if text.is_empty() {

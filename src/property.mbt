@@ -15,9 +15,9 @@
 #callsite(autofill(loc))
 pub fn[A : @quickcheck.Arbitrary + @quickcheck.Shrink + @debug.Debug] for_all(
   property : (A) -> Unit raise Error,
-  count? : UInt,
-  max_size? : UInt,
-  max_shrinks? : UInt,
+  count? : UInt32,
+  max_size? : UInt32,
+  max_shrinks? : UInt32,
   seed? : UInt64,
   loc~ : SourceLoc,
 ) -> Unit raise Error {

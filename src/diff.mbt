@@ -35,9 +35,9 @@ fn closing_bracket(c : Char) -> Char? {
 /// `None`. Return the items and the position after `close`.
 fn parse_items(
   chars : Array[Char],
-  start : Int,
+  start : Int32,
   close : Char?,
-) -> (Array[Array[Doc]], Int) {
+) -> (Array[Array[Doc]], Int32) {
   let items : Array[Array[Doc]] = [[]]
   let text = StringBuilder()
   let flush = () => {
@@ -136,7 +136,11 @@ fn expands(open : Char, items : Array[Array[Doc]]) -> Bool {
 }
 
 ///|
-fn write_docs(builder : StringBuilder, docs : Array[Doc], indent : Int) -> Unit {
+fn write_docs(
+  builder : StringBuilder,
+  docs : Array[Doc],
+  indent : Int32,
+) -> Unit {
   for doc in docs {
     match doc {
       Text(content) => builder.write_string(content)
@@ -490,9 +494,9 @@ priv struct StringMismatch {
   expected : String
   actual : String
   /// The column of the first difference in the shown text.
-  column : Int
+  column : Int32
   /// The index of the first difference, in characters.
-  index : Int
+  index : Int32
 }
 
 ///|

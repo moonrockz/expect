@@ -3,7 +3,7 @@
 ///|
 #callsite(autofill(loc))
 fn @expect.Expectation::to_be_even(
-  self : @expect.Expectation[Int],
+  self : @expect.Expectation[Int32],
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   self.assert_that(
@@ -50,8 +50,8 @@ test "custom matcher supports not() and labels" {
 ///|
 #callsite(autofill(loc))
 fn @expect.Expectation::to_have_total(
-  self : @expect.Expectation[Array[Int]],
-  total : Int,
+  self : @expect.Expectation[Array[Int32]],
+  total : Int32,
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let actual_total = self.actual.fold(init=0, (sum, x) => sum + x)
@@ -105,7 +105,7 @@ test "custom matcher failure points at the matcher call" {
 
 ///|
 /// A reusable matcher, as a shared package would export it.
-fn even() -> @expect.Matcher[Int] {
+fn even() -> @expect.Matcher[Int32] {
   {
     describe: () => "even",
     check: x => if x % 2 == 0 { None } else { Some("was odd") },

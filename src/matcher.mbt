@@ -40,7 +40,7 @@ pub fn[T : Eq + @debug.Debug] equal_to(expected : T) -> Matcher[T] {
 /// A matcher for values that satisfy `predicate`.
 pub fn[T : @debug.Debug] satisfying(
   predicate : (T) -> Bool,
-  description? : String = "predicate",
+  description~ : String = "predicate",
 ) -> Matcher[T] {
   {
     describe: () => description,

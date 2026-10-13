@@ -26,7 +26,7 @@ pub fn failure_message(
 #callsite(autofill(loc))
 pub fn expect_failure(
   f : () -> Unit raise Error,
-  label? : String = "",
+  label~ : String = "",
   loc~ : SourceLoc,
 ) -> Expectation[String] raise Error {
   let message = try f() catch {

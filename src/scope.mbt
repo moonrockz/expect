@@ -17,7 +17,7 @@ priv struct ScopeState {
   /// Notes about blocks that stopped early.
   notes : Array[String]
   /// The number of assertions that ran.
-  mut assertions : Int
+  mut assertions : Int32
 }
 
 ///|
@@ -39,7 +39,7 @@ fn Scope::record(self : Scope, loc : String, message : String) -> Unit {
 pub fn[T] Scope::expect(
   self : Scope,
   actual : T,
-  label? : String = "",
+  label~ : String = "",
 ) -> Expectation[T] {
   {
     actual,
@@ -56,7 +56,7 @@ pub fn[T] Scope::expect(
 pub fn[T] Scope::expect_call(
   self : Scope,
   f : () -> T raise Error,
-  label? : String = "",
+  label~ : String = "",
 ) -> Expectation[() -> T raise Error] {
   {
     actual: f,

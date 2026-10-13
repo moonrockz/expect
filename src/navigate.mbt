@@ -53,7 +53,7 @@ pub fn[T, U] Expectation::get(
 #callsite(autofill(loc))
 pub fn[T : @debug.Debug] Expectation::element(
   self : Expectation[Array[T]],
-  index : Int,
+  index : Int32,
   loc~ : SourceLoc,
 ) -> Expectation[T] raise Error {
   self.check_not_negated("element", loc)

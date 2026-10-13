@@ -18,8 +18,8 @@
 #callsite(autofill(loc))
 pub async fn eventually(
   block : async () -> Unit,
-  timeout? : Int = 1000,
-  interval? : Int = 50,
+  timeout~ : Int32 = 1000,
+  interval~ : Int32 = 50,
   loc~ : SourceLoc,
 ) -> Unit {
   let mut last : Error? = None

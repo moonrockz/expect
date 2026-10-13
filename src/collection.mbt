@@ -4,14 +4,14 @@
 /// Show the elements at `indices`, one per line: `index 1: 2`.
 fn[T : @debug.Debug] show_indexed(
   items : Array[T],
-  indices : Array[Int],
+  indices : Array[Int32],
 ) -> String {
   indices.map(i => "index \{i}: \{show(items[i])}").join("\n")
 }
 
 ///|
 /// The indices of the elements that satisfy `predicate`.
-fn[T] indices_where(items : Array[T], predicate : (T) -> Bool) -> Array[Int] {
+fn[T] indices_where(items : Array[T], predicate : (T) -> Bool) -> Array[Int32] {
   let indices = []
   for i, item in items {
     if predicate(item) {
@@ -119,9 +119,9 @@ pub fn[T : Eq + @debug.Debug] Expectation::to_contain_in_order(
 ) -> Unit raise Error {
   // The first element of `expected` that is not found, and the index of the
   // element before it.
-  let mut missing : (T, Int?)? = None
+  let mut missing : (T, Int32?)? = None
   let mut next = 0
-  let mut previous : Int? = None
+  let mut previous : Int32? = None
   for want in expected {
     let mut found = false
     while next < self.actual.length() {
@@ -199,7 +199,7 @@ pub fn[T : Eq + @debug.Debug] Expectation::to_end_with_elements(
 pub fn[T : @debug.Debug] Expectation::to_any_satisfy(
   self : Expectation[Array[T]],
   predicate : (T) -> Bool,
-  description? : String = "predicate",
+  description~ : String = "predicate",
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let satisfied = indices_where(self.actual, predicate)
@@ -226,7 +226,7 @@ pub fn[T : @debug.Debug] Expectation::to_any_satisfy(
 pub fn[T : @debug.Debug] Expectation::to_none_satisfy(
   self : Expectation[Array[T]],
   predicate : (T) -> Bool,
-  description? : String = "predicate",
+  description~ : String = "predicate",
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let satisfied = indices_where(self.actual, predicate)
@@ -252,9 +252,9 @@ pub fn[T : @debug.Debug] Expectation::to_none_satisfy(
 #callsite(autofill(loc))
 pub fn[T : @debug.Debug] Expectation::to_have_count_satisfying(
   self : Expectation[Array[T]],
-  count : Int,
+  count : Int32,
   predicate : (T) -> Bool,
-  description? : String = "predicate",
+  description~ : String = "predicate",
   loc~ : SourceLoc,
 ) -> Unit raise Error {
   let actual_count = indices_where(self.actual, predicate).length()
@@ -319,7 +319,10 @@ pub fn[T : @debug.Debug] Expectation::to_satisfy_respectively(
 
 ///|
 /// The index of the first element that is greater than the element after it.
-fn[T, K : Compare] first_out_of_order(items : Array[T], key : (T) -> K) -> Int? {
+fn[T, K : Compare] first_out_of_order(
+  items : Array[T],
+  key : (T) -> K,
+) -> Int32? {
   for i in 0..<(items.length() - 1) {
     if key(items[i]) > key(items[i + 1]) {
       return Some(i)
