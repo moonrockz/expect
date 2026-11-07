@@ -90,8 +90,8 @@ fn run_scope(scope : Scope, block : (Scope) -> Unit raise Error) -> Unit {
       match message.find(marker) {
         Some(index) =>
           scope.record(
-            message.view(end_offset=index).to_owned(),
-            message.view(start_offset=index + marker.length()).to_owned(),
+            message.exact_view(end=index).to_owned(),
+            message.exact_view(start=index + marker.length()).to_owned(),
           )
         None => scope.record("", message)
       }

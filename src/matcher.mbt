@@ -160,7 +160,7 @@ fn mismatch_reason(error : Error) -> String {
     lines
     .search_by(line => line.has_prefix("\{name}:"))
     .map(i => {
-      lines[i].view(start_offset=name.length() + 1).trim(chars=" ").to_owned()
+      lines[i].exact_view(start=name.length() + 1).trim(chars=" ").to_owned()
     })
   }
   match (value_of("Received"), value_of("Expected")) {

@@ -59,9 +59,9 @@ fn Node::text(self : Node) -> String {
 /// when the text has no label.
 fn split_label(text : String) -> (String, String)? {
   guard text.find("=") is Some(index) else { return None }
-  let label = text.view(end_offset=index).to_owned()
+  let label = text.exact_view(end=index).to_owned()
   guard is_field_name(label) else { return None }
-  Some((label, text.view(start_offset=index + 1).to_owned()))
+  Some((label, text.exact_view(start=index + 1).to_owned()))
 }
 
 ///|

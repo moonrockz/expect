@@ -38,7 +38,7 @@ fn file_lines(path : String) -> Array[String]? {
 /// end column is exclusive.
 fn parse_location(text : String) -> (String, Int32, Int32, Int32, Int32)? {
   let without_package = match text.rev_find("@") {
-    Some(index) => text.view(end_offset=index).to_owned()
+    Some(index) => text.exact_view(end=index).to_owned()
     None => text
   }
   let parts = without_package.split(":").map(part => part.to_owned()).collect()

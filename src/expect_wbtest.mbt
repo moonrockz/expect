@@ -62,10 +62,11 @@ test "to_equal" {
 }
 
 ///|
+#derive(Eq, Debug)
 priv struct Point {
   x : Int32
   y : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 test "to_equal shows a structural diff" {
@@ -485,7 +486,7 @@ test "to_match" {
     content=(
       #|expect(received).to_match(pattern)
       #|Error: invalid regex pattern "(unclosed"
-      #|Cause: ParserError at position 9: Unclosed group
+      #|Cause: ParserError at position 0: Unclosed group
     ),
   )
 }
@@ -616,9 +617,10 @@ test "HasLength works for other core collections" {
 }
 
 ///|
+#derive(Debug)
 priv struct Bag {
   items : Array[Int32]
-} derive(Debug)
+}
 
 ///|
 impl HasLength for Bag with fn length(self) {
@@ -736,17 +738,19 @@ test "pretty prints Debug text with one item per line" {
 }
 
 ///|
+#derive(Eq, Debug)
 priv struct User {
   name : String
   tags : Array[String]
   address : Address
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 priv struct Address {
   city : String
   zip : String
-} derive(Eq, Debug)
+}
 
 ///|
 test "to_equal shows a git-style diff of nested values" {
@@ -836,9 +840,10 @@ test "to_equal diff has one hunk per distant change" {
 
 ///|
 /// The README example of a manual `Debug` impl.
+#derive(Eq)
 priv struct Money {
   cents : Int32
-} derive(Eq)
+}
 
 ///|
 impl @debug.Debug for Money with fn to_repr(self) {
@@ -849,11 +854,12 @@ impl @debug.Debug for Money with fn to_repr(self) {
 }
 
 ///|
+#derive(Eq)
 priv struct Account {
   owner : String
   password : String
   balance : Money
-} derive(Eq)
+}
 
 ///|
 impl @debug.Debug for Account with fn to_repr(self) {

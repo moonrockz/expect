@@ -35,10 +35,7 @@ fn bytes_values(text : String) -> Array[Int32]? {
     return None
   }
   guard text.has_suffix("]>") else { return None }
-  let body = text.view(
-    start_offset=prefix.length(),
-    end_offset=text.length() - 2,
-  )
+  let body = text.exact_view(start=prefix.length(), end=text.length() - 2)
   if body.is_empty() {
     return Some([])
   }
