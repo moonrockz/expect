@@ -8,9 +8,9 @@ fn scoped_failure(f : () -> Unit raise Error) -> String raise Error {
   .map(line => {
     match (line.find(" src/"), line.find("@moonrockz/expect: ")) {
       (Some(start), Some(end)) =>
-        line.view(end_offset=start).to_owned() +
+        line.exact_view(end=start).to_owned() +
         " <loc>: " +
-        line.view(start_offset=end + "@moonrockz/expect: ".length()).to_owned()
+        line.exact_view(start=end + "@moonrockz/expect: ".length()).to_owned()
       _ => line
     }
   })

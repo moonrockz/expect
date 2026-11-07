@@ -57,15 +57,15 @@ pub fn[A : @quickcheck.Arbitrary + @quickcheck.Shrink + @debug.Debug] for_all(
   let lines = summary.split("\n").map(line => line.to_owned()).collect()
   let details = [("Counterexample", show(value))]
   if lines.search_by(line => line.has_prefix("shrinks: ")) is Some(i) {
-    details.push(("Shrinks", lines[i].view(start_offset=9).to_owned()))
+    details.push(("Shrinks", lines[i].exact_view(start=9).to_owned()))
   }
   let failure = match cause {
     Failure(message) =>
       match message.find(" FAILED: ") {
         Some(index) =>
-          message.view(end_offset=index).to_owned() +
+          message.exact_view(end=index).to_owned() +
           ": " +
-          message.view(start_offset=index + 9).to_owned()
+          message.exact_view(start=index + 9).to_owned()
         None => message
       }
     other => "error: \{other}"

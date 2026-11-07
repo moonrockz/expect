@@ -1,15 +1,17 @@
 ///|
+#derive(Debug)
 priv struct Cash {
   amount : Int32
-} derive(Debug)
+}
 
 ///|
+#derive(Debug)
 priv struct Wallet {
   id : Int32
   owner : String
   balance : Cash
   tags : Array[String]
-} derive(Debug)
+}
 
 ///|
 fn account(id : Int32, amount : Int32, tags : Array[String]) -> Wallet {
@@ -176,7 +178,8 @@ test "enum constructors with labelled arguments" {
 }
 
 ///|
+#derive(Debug)
 priv enum Figure {
   Circle(radius~ : Int32)
   Line(Int32, Int32)
-} derive(Debug)
+}

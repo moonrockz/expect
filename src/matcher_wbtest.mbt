@@ -1,9 +1,10 @@
 ///|
+#derive(Debug)
 priv struct Member {
   name : String
   age : Int32
   city : String
-} derive(Debug)
+}
 
 ///|
 let members : Array[Member] = [

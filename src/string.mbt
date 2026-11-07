@@ -82,7 +82,7 @@ pub fn Expectation::to_contain_times(
   let mut rest = self.actual[:]
   while rest.find(text) is Some(index) {
     actual_count += 1
-    rest = rest.view(start_offset=index + text.length())
+    rest = rest.exact_view(start=index + text.length())
   }
   self.assert_that(
     actual_count == count,
@@ -111,7 +111,7 @@ pub fn Expectation::to_contain_substrings_in_order(
   for part in parts {
     match rest.find(part) {
       Some(index) => {
-        rest = rest.view(start_offset=index + part.length())
+        rest = rest.exact_view(start=index + part.length())
         previous = Some(part)
       }
       None => {

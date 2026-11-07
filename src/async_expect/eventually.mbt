@@ -48,9 +48,9 @@ pub async fn eventually(
     Some(Failure(message)) =>
       match message.find(" FAILED: ") {
         Some(index) =>
-          message.view(end_offset=index).to_owned() +
+          message.exact_view(end=index).to_owned() +
           ": " +
-          message.view(start_offset=index + 9).to_owned()
+          message.exact_view(start=index + 9).to_owned()
         None => message
       }
     Some(error) => "error: \{error}"

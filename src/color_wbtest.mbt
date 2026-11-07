@@ -28,7 +28,7 @@ fn raw_failure(f : () -> Unit raise Error) -> String raise Error {
       let marker = " FAILED: "
       return match message.find(marker) {
         Some(index) =>
-          message.view(start_offset=index + marker.length()).to_owned()
+          message.exact_view(start=index + marker.length()).to_owned()
         None => message
       }
     }

@@ -1,13 +1,15 @@
 ///|
+#derive(Debug)
 priv struct Person {
   name : String
   address : Home
-} derive(Debug)
+}
 
 ///|
+#derive(Debug)
 priv struct Home {
   city : String
-} derive(Debug)
+}
 
 ///|
 let ada : Person = { name: "Ada", address: { city: "London", }, }
