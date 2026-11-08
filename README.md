@@ -2,6 +2,13 @@
 
 A fluent assertion library for MoonBit.
 
+## Requirements
+
+The minimum toolchain is MoonBit 0.10.20 (moonc `v0.10.20+65efd5b93`,
+moon `0.1.20261104`). MoonBit 0.10.18 and older are not supported: the source
+uses the `#derive(...)` attribute, which 0.10.18 ignores. See
+[CHANGELOG.md](CHANGELOG.md) for the changes in each release.
+
 ## Install
 
 ```bash
