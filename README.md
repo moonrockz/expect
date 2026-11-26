@@ -5,9 +5,10 @@ A fluent assertion library for MoonBit.
 ## Requirements
 
 The minimum toolchain is MoonBit 0.10.20 (moonc `v0.10.20+65efd5b93`,
-moon `0.1.20261104`). MoonBit 0.10.18 and older are not supported: the source
-uses the `#derive(...)` attribute, which 0.10.18 ignores. See
-[CHANGELOG.md](CHANGELOG.md) for the changes in each release.
+moon `0.1.20261104`); CI and releases are tested on MoonBit 1.0.0-rc1
+(moonc `v1.0.0-rc1+3c0520448`, moon `0.1.20261126`). MoonBit 0.10.18 and older
+are not supported: the source uses the `#derive(...)` attribute, which 0.10.18
+ignores. See [CHANGELOG.md](CHANGELOG.md) for the changes in each release.
 
 ## Install
 
